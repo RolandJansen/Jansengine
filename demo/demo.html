@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <script src="./jansengine.js"></script>
+        <script src="demo.js"></script>
+        <title>Jansengine Demo</title>
+    </head>
+    <body onload="init();">
+            <canvas id="demo" width="800" height="600"></canvas>
+    </body>
+    <script>
+
+        function init() {
+            const demo = jansengine.getInstance("demo");
+            demo.loadMap(levelMap);
+        }
+    </script>
+</html>

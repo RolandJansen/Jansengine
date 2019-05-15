@@ -1,0 +1,56 @@
+{
+  "name": "jansengine",
+  "version": "0.1.0",
+  "description": "A raycasting engine for the web (canvas).",
+  "private": true,
+  "scripts": {
+    "build": "webpack",
+    "build:demo": "npm run build && cp ./dist/jansengine.js ./demo/",
+    "compile": "tsc",
+    "test": "jest --watch",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RolandJansen/Jansengine.git"
+  },
+  "keywords": [
+    "raycasting",
+    "3d",
+    "canvas2d",
+    "graphics",
+    "html5"
+  ],
+  "author": "Roland Jansen",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/RolandJansen/Jansengine/issues"
+  },
+  "homepage": "https://github.com/RolandJansen/Jansengine#readme",
+  "jest": {
+    "transform": {
+      "^.+\\.(t|j)sx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "testURL": "http://localhost/"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.12",
+    "dts-bundle-webpack": "^1.0.2",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-loader": "^6.0.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5",
+    "webpack": "^4.31.0",
+    "webpack-cli": "^3.3.2"
+  }
+}
