@@ -1,14 +1,18 @@
-/* eslint-disable */
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DtsBundleWebpack = require('dts-bundle-webpack');
+const webpack = require('webpack');
 
 module.exports = {
     mode: 'development',
-    entry: './src/index.ts',
+    entry: {
+        jansengine: './src/index.ts',
+        demo: './src/demo.ts'
+    },
     output: {
         path: path.resolve(__dirname, './dist'),
-        filename: 'jansengine.js',
-        library: 'jansengine',
+        filename: '[name].js',
+        library: '[name]',
         libraryTarget: 'umd',
         globalObject: 'this'
     },
@@ -33,6 +37,15 @@ module.exports = {
             out: '../dist/jansengine.d.ts',
             removeSource: true,
             outputAsModuleFolder: true
-        })
-    ]
+        }),  // bundle type files
+        new webpack.NamedModulesPlugin(),  // clean build logs
+        new HtmlWebpackPlugin({
+            template: './src/demo.html'
+        }),  // use a html template for the demo
+        new webpack.HotModuleReplacementPlugin()  // use hot resync
+    ],
+    devServer: {
+        contentBase: path.resolve(__dirname, './dist'),
+        hot: true
+    }
 };

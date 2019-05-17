@@ -5,10 +5,9 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "build:demo": "npm run build && cp ./dist/jansengine.js ./demo/",
     "compile": "tsc",
     "test": "jest --watch",
-    "watch": "tsc --watch"
+    "watch": "webpack-dev-server --open"
   },
   "repository": {
     "type": "git",
@@ -51,6 +50,7 @@
     "tslint": "^5.16.0",
     "typescript": "^3.4.5",
     "webpack": "^4.31.0",
-    "webpack-cli": "^3.3.2"
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.3.1"
   }
 }

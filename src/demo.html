@@ -1,7 +1,5 @@
 <html>
     <head>
-        <script src="./jansengine.js"></script>
-        <script src="demo.js"></script>
         <title>Jansengine Demo</title>
     </head>
     <body onload="init();">
@@ -10,8 +8,8 @@
     <script>
 
         function init() {
-            const demo = jansengine.getInstance("demo");
-            demo.loadMap(levelMap);
+            const game = jansengine.getInstance("demo");
+            game.loadMap(demo.levelMap);
         }
     </script>
 </html>
