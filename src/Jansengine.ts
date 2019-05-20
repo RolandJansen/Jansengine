@@ -1,41 +1,31 @@
 import KeyBindings from "./KeyBindings";
 import MiniMap from "./MiniMap";
+import Player from "./Player";
+import Stage from "./Stage";
+import { ICanvasStack } from "./interfaces";
 
 export default class Jansengine {
 
-    private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
+    private stage: Stage;
     private map!: MiniMap;
+    private player: Player;
     private keyBindings: KeyBindings;
 
-    constructor(canvasName: string) {
-        const canvas = document.getElementById(canvasName);
+    constructor(containerName: string) {
 
-        if (canvas !== null && this.isCanvas(canvas)) {
-            this.canvas = canvas;
-            this.ctx = canvas.getContext("2d")!;
-        } else {
-            throw new Error(`${canvasName} is not of type HTMLCanvasElement`);
-        }
-
-        this.setFocusToCanvas(this.canvas);
-        this.keyBindings = new KeyBindings();
+        this.stage = new Stage(containerName);
+        this.player = new Player();
+        this.keyBindings = new KeyBindings(this.player);
     }
 
     public gameCycle() {
+        this.player.moveOneStep();
+
         setTimeout(this.gameCycle, 1000 / 30);
     }
 
     public loadMap(mapData: number[][]) {
-        this.map = new MiniMap(this.canvas, mapData);
+        this.map = new MiniMap(this.stage.getMiniMapContext(), mapData);
     }
 
-    // type guard
-    private isCanvas(el: HTMLElement): el is HTMLCanvasElement {
-        return (el as HTMLCanvasElement).getContext !== undefined;
-    }
-
-    private setFocusToCanvas(canvasElement: HTMLCanvasElement) {
-        canvasElement.focus();
-    }
 }
