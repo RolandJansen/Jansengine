@@ -78,10 +78,25 @@ export default class Player {
     }
 
     private castRays() {
+        const colums = 320;
+        const columAngleDelta = 60 / 320;
+        const rayLengths: number[] = [];
+        let rayDirection = this.directionAngle - 30;
+
+        for (let i = 0; i < colums; i++) {
+            this.castRayAt(rayDirection);
+            const rayLength = this.getRayLength();
+            rayLengths.push(rayLength);
+            rayDirection += columAngleDelta;
+        }
+    }
+
+    private castRayAt(direction: number) {
 
     }
 
-    private castSingleRay() {
+    private getRayLength(): number {
 
+        return 1;
     }
 }

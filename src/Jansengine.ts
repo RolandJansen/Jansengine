@@ -9,6 +9,7 @@ import Stage from "./Stage";
  * This is heavily influenced by other projects:
  * https://permadi.com/1996/05/ray-casting-tutorial-table-of-contents/
  * https://dev.opera.com/articles/3d-games-with-canvas-and-raycasting-part-1/
+ * https://developer.ibm.com/tutorials/wa-canvashtml5layering/
  */
 export default class Jansengine {
 

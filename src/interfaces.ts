@@ -6,3 +6,7 @@ export interface ICoords {
 export interface ICanvasStack {
     [canvasName: string]: HTMLCanvasElement
 }
+
+export interface ILookupTables {
+    [tableName: string]: number[]
+}
