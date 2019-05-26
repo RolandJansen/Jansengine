@@ -1,11 +1,19 @@
-import { ICanvasStack } from "./interfaces";
+import { ICanvasStack, ICanvasSize } from "./interfaces";
 
-export default class Stage {
+export default class ProjectionScreen {
 
     private canvasStack: ICanvasStack;
+    private canvasSize: ICanvasSize = {
+        width: 640,
+        height: 400,
+    };
 
-    constructor(containerName: string) {
+    constructor(containerName: string, canvasSize?: ICanvasSize) {
         const container = document.getElementById(containerName);
+
+        if (canvasSize) {
+            this.canvasSize = canvasSize;
+        }
 
         if (container !== null && container.tagName === "DIV") {
             this.canvasStack = this.getNewCanvasStack();
@@ -69,8 +77,8 @@ export default class Stage {
     }
 
     private setCanvasProperties(canvas: HTMLCanvasElement) {
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = this.canvasSize.width;
+        canvas.height = this.canvasSize.height;
         canvas.style.backgroundColor = "transparent";
 
         canvas.style.position = "absolute";

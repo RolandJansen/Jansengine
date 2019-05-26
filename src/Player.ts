@@ -2,7 +2,7 @@ import { ICoords } from "./interfaces"
 
 export default class Player {
 
-    public coords: ICoords = {
+    public playerPosition: ICoords = {
         x: 16,
         y: 10,
     };
@@ -14,10 +14,11 @@ export default class Player {
 
     private mapWidth: number;
     private mapHeight: number;
+    private tileSize = 1;
 
-    constructor(private mapData: number[][], coords?: ICoords) {
-        if (coords) {
-            this.coords = coords;
+    constructor(private mapData: number[][], initialPlayerPos?: ICoords) {
+        if (initialPlayerPos) {
+            this.playerPosition = initialPlayerPos;
         }
 
         this.mapWidth = mapData[0].length;
@@ -28,12 +29,12 @@ export default class Player {
         const stepDistance = this.walk * this.movementSpeed;
         this.directionAngle += this.rotate * this.rotationSpeedInRadians;
 
-        const x = this.coords.x + Math.cos(this.directionAngle) * stepDistance;
-        const y = this.coords.y + Math.sin(this.directionAngle) * stepDistance;
+        const x = this.playerPosition.x + Math.cos(this.directionAngle) * stepDistance;
+        const y = this.playerPosition.y + Math.sin(this.directionAngle) * stepDistance;
 
         if (!this.isBlocking(x, y)) {
-            this.coords.x = x;
-            this.coords.y = y;
+            this.playerPosition.x = x;
+            this.playerPosition.y = y;
         }
 
         // console.log(this.coords.x + " : " + this.coords.y);
@@ -75,28 +76,5 @@ export default class Player {
             return true;
         }
         return false;
-    }
-
-    private castRays() {
-        const colums = 320;
-        const columAngleDelta = 60 / 320;
-        const rayLengths: number[] = [];
-        let rayDirection = this.directionAngle - 30;
-
-        for (let i = 0; i < colums; i++) {
-            this.castRayAt(rayDirection);
-            const rayLength = this.getRayLength();
-            rayLengths.push(rayLength);
-            rayDirection += columAngleDelta;
-        }
-    }
-
-    private castRayAt(direction: number) {
-
-    }
-
-    private getRayLength(): number {
-
-        return 1;
     }
 }

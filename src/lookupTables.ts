@@ -1,7 +1,9 @@
 import { ILookupTables } from "./interfaces"
 
-// This is a not-exact copied from the tutorial by F. Permadi:
+// This is basically copied from the tutorial by F. Permadi:
 // https://github.com/permadi-com/ray-cast
+// The idea is to pre-compute as much data as possible and
+// lookup the values in the game loop
 
 export function getLookupTables(): ILookupTables {
     if (tables.sinTable.length === 0) {
@@ -22,7 +24,8 @@ const tables: ILookupTables = {
 
 function initLookupTables() {
 
-    for (let i = 0; i < 360; i++) {
+    // 361 records because: 360deg + 0deg
+    for (let i = 0; i <= 360; i++) {
 
         // Populate tables with their radian values.
         // (The addition of 0.0001 is a kludge to avoid divisions by 0.

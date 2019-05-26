@@ -1,5 +1,5 @@
-import { ICoords } from "./interfaces";
-import Stage from "./Stage";
+import { ICoords, IRayData } from "./interfaces";
+import ProjectionScreen from "./ProjectionScreen";
 
 export default class MiniMap {
 
@@ -13,9 +13,9 @@ export default class MiniMap {
     private mapWidth: number;
     private mapHeight: number;
 
-    constructor(private stage: Stage, private mapData: number[][]) {
-        this.mapCtx = stage.getMiniMapContext();
-        this.playerCtx = stage.getMiniPlayerContext();
+    constructor(private mapData: number[][], screen: ProjectionScreen) {
+        this.mapCtx = screen.getMiniMapContext();
+        this.playerCtx = screen.getMiniPlayerContext();
 
         this.widthInBlocks = mapData[0].length;
         this.heightInBlocks = mapData.length;
@@ -33,6 +33,23 @@ export default class MiniMap {
         this.drawPlayerDirection(playerPosition, playerDirection);
     }
 
+    public updateRays(playerPosition: ICoords, rays: IRayData) {
+
+        for (const collision of rays.collisions) {
+            this.playerCtx.beginPath();
+            this.playerCtx.moveTo(
+                playerPosition.x * this.miniMapBlockWidth,
+                playerPosition.y * this.miniMapBlockWidth,
+            );
+            this.playerCtx.lineTo(
+                collision.x * this.miniMapBlockWidth,
+                collision.y * this.miniMapBlockWidth,
+            );
+            this.playerCtx.closePath();
+            this.playerCtx.stroke();
+        }
+    }
+
     private clearPlayerCanvas() {
         this.playerCtx.clearRect(0, 0, this.mapWidth, this.mapHeight);
     }
@@ -43,10 +60,10 @@ export default class MiniMap {
      */
     private drawPlayer(playerPosition: ICoords) {
         this.playerCtx.fillRect(
-            playerPosition.x * this.miniMapBlockWidth -2,
-            playerPosition.y * this.miniMapBlockWidth -2,
+            playerPosition.x * this.miniMapBlockWidth - 2,
+            playerPosition.y * this.miniMapBlockWidth - 2,
             this.playerEdgeLength,
-            this.playerEdgeLength
+            this.playerEdgeLength,
         );
     }
 
@@ -59,11 +76,11 @@ export default class MiniMap {
         this.playerCtx.beginPath();
         this.playerCtx.moveTo(
             playerPosition.x * this.miniMapBlockWidth,
-            playerPosition.y * this.miniMapBlockWidth
+            playerPosition.y * this.miniMapBlockWidth,
         );
         this.playerCtx.lineTo(
             (playerPosition.x + Math.cos(playerDirection) * this.playerEdgeLength) * this.miniMapBlockWidth,
-            (playerPosition.y + Math.sin(playerDirection) * this.playerEdgeLength) * this.miniMapBlockWidth
+            (playerPosition.y + Math.sin(playerDirection) * this.playerEdgeLength) * this.miniMapBlockWidth,
         )
         this.playerCtx.closePath();
         this.playerCtx.stroke();
