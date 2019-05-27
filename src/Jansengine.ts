@@ -38,7 +38,7 @@ export default class Jansengine {
     public gameCycle() {
         this.player.move();
         const rays = this.rayCaster.castRays(this.player.playerPosition, this.player.directionAngle);
-        // console.log(rays);
+        console.log(rays);
         this.map.updateMiniPlayer(this.player.playerPosition, this.player.directionAngle);
         this.map.updateRays(this.player.playerPosition, rays);
 

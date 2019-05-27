@@ -33,17 +33,17 @@ export default class MiniMap {
         this.drawPlayerDirection(playerPosition, playerDirection);
     }
 
-    public updateRays(playerPosition: ICoords, rays: IRayData) {
+    public updateRays(playerPosition: ICoords, rays: IRayData[]) {
 
-        for (const collision of rays.collisions) {
+        for (const ray of rays) {
             this.playerCtx.beginPath();
             this.playerCtx.moveTo(
                 playerPosition.x * this.miniMapBlockWidth,
                 playerPosition.y * this.miniMapBlockWidth,
             );
             this.playerCtx.lineTo(
-                collision.x * this.miniMapBlockWidth,
-                collision.y * this.miniMapBlockWidth,
+                ray.collision.x * this.miniMapBlockWidth,
+                ray.collision.y * this.miniMapBlockWidth,
             );
             this.playerCtx.closePath();
             this.playerCtx.stroke();
