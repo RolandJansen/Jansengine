@@ -8,7 +8,7 @@ export interface ICanvasStack {
 }
 
 export interface ILookupTables {
-    readonly [tableName: string]: number[];
+    [tableName: string]: number[];
 }
 
 export interface IEngineOptions {
@@ -26,7 +26,7 @@ export interface IRayData {
     collision: ICoords;
 }
 
-export interface IRayDataXYCombined {
+export interface IRayDataHVCombined {
     hRayLength: number;
     vRayLength: number;
     hCollision: ICoords;

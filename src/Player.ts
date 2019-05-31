@@ -1,4 +1,5 @@
-import { ICoords } from "./interfaces"
+import { ICoords, ILookupTables } from "./interfaces";
+import { getLookupTables } from "./lookupTables";
 
 export default class Player {
 
@@ -6,15 +7,15 @@ export default class Player {
         x: 16,
         y: 10,
     };
-    public directionAngle = 0;  // north = 0, south = 180 etc
+    public direction = 0;  // north=90°, south=270°, etc
     public movementSpeed = 0.18;
-    public rotate = 0;  // left = -1, right = 1
-    public walk = 0; // backward = -1, forward = 1
-    public rotationSpeedInRadians = 6 * Math.PI / 180;
+    public rotateLeftRight = 0;  // left = 1, right = -1 (degree)
+    public walkForBack = 0; // backward = -1, forward = 1
+    public rotationSpeed = 3;  // degrees per game cycle
 
     private mapWidth: number;
     private mapHeight: number;
-    private tileSize = 1;
+    private tables: ILookupTables;
 
     constructor(private mapData: number[][], initialPlayerPos?: ICoords) {
         if (initialPlayerPos) {
@@ -23,22 +24,29 @@ export default class Player {
 
         this.mapWidth = mapData[0].length;
         this.mapHeight = mapData.length;
+        this.tables = getLookupTables();
     }
 
     public move() {
-        const stepDistance = this.walk * this.movementSpeed;
-        this.directionAngle += this.rotate * this.rotationSpeedInRadians;
+        const stepDistance = this.walkForBack * this.movementSpeed;
+        this.direction += this.rotateLeftRight * this.rotationSpeed;
 
-        const x = this.playerPosition.x + Math.cos(this.directionAngle) * stepDistance;
-        const y = this.playerPosition.y + Math.sin(this.directionAngle) * stepDistance;
+        if (this.direction < 0) {
+            this.direction += 360;
+        }
+        if (this.direction >= 360) {
+            // maybe modulo is cheaper (?)
+            this.direction -= 360;
+        }
+
+        const x = this.playerPosition.x + this.tables.cos[this.direction] * stepDistance;
+        const y = this.playerPosition.y - this.tables.sin[this.direction] * stepDistance;
 
         if (!this.isBlocking(x, y)) {
             this.playerPosition.x = x;
             this.playerPosition.y = y;
         }
 
-        // console.log(this.coords.x + " : " + this.coords.y);
-        // console.log(this.directionAngle);
     }
 
     /**

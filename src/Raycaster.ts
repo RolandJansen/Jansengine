@@ -1,164 +1,113 @@
-import { ICoords, IRayData, IRayDataXYCombined } from "./interfaces"
+import { ICoords, ILookupTables, IRayData, IRayDataHVCombined } from "./interfaces";
+import { getLookupTables } from "./lookupTables";
 
 export default class Raycaster {
     private readonly mapWidth: number;
     private readonly mapHeight: number;
+    private tables: ILookupTables;
 
     constructor(
         private readonly mapData: number[][],
         private readonly tileSize: number,
         private playerPosition: ICoords) {
-        this.mapWidth = this.mapData[0].length;
-        this.mapHeight = this.mapData.length;
-        // this.rayData = { rayLengths: [], collisions: [] };
+
+            this.tables = getLookupTables();
+            this.mapWidth = this.mapData[0].length;
+            this.mapHeight = this.mapData.length;
+            // this.rayData = { rayLengths: [], collisions: [] };
     }
 
-    public castRays(playerPosition: ICoords, directionAngle: number): IRayData[] {
+    public castRays(playerPosition: ICoords, direction: number): IRayData[] {
 
+        // console.log(directionAngle);
         const rays: IRayData[] = [];
         const colums = 320;
         const columAngleDelta = 60 / 320;
-        let rayAngle = directionAngle - 30;
-        if (rayAngle < 0) {
-            rayAngle += 360;
-        }
+        let rayAngleDeg = direction - 30;
+
         this.playerPosition = playerPosition;
 
-        for (let i = 0; i < colums; i++) {
+        for (let i = 0; i < 60; i++) {
         // for (let i = 0; i < 10; i++) {
             // we commit the rayData object to the castRayAt method
             // so the arrays can be populated. Normally this is not a
             // good approach but we do it here for the sake of performance.
-            rays[i] = this.castRayAt(rayAngle);
-
-            rayAngle += columAngleDelta;
+            rays[i] = this.castRayAt(rayAngleDeg);
+            rayAngleDeg += 1;
         }
 
         return rays;
     }
 
     private castRayAt(rayAngle: number): IRayData {
-        const rayDataCombined: IRayDataXYCombined = {
+        const rayDataCombined: IRayDataHVCombined = {
             hRayLength: 0,
             vRayLength: 0,
             hCollision: { x: 0, y: 0 },
             vCollision: { x: 0, y: 0 },
         };
 
-        let rayDirection = 1; // ray is facing up
-
-        if (rayAngle === 0 || rayAngle === 90 || rayAngle === 180 || rayAngle === 270 || rayAngle === 360) {
-            // trigonometry is useless if it's not a triangle
-            // TODO: What should we do here?
-            // return ;
+        // make shure we're between 0° and 359°
+        if (rayAngle < 0) {
+            rayAngle += 360;
         }
-
-        if (rayAngle > 360) {
+        if (rayAngle >= 360) {
             rayAngle -= 360;
         }
-        if (rayAngle > 0 && rayAngle < 180) {  // ray is facing down
-            rayDirection = -1;
+
+        let rayYDirection = 1; // ray is facing up
+        if (rayAngle >= 0 && rayAngle < 180) {  // ray is facing down
+            rayYDirection = -1;
+        }
+
+        let rayXDirection = 1; // ray is facing left
+        if (rayAngle >= 90 && rayAngle < 270) {  // ray is facing right
+            rayXDirection = -1;
         }
 
         ////////////////////////////
         // horizontal intersections
         ////////////////////////////
-        const hCollision = this.getHorizontalCollision(rayAngle, rayDirection);
+        const hCollision = this.getHorizontalCollision(rayAngle, rayYDirection);
         rayDataCombined.hRayLength = this.getRayLength(hCollision, rayAngle);
         rayDataCombined.hCollision = hCollision;
 
         ////////////////////////////
         // vertical intersections
         ////////////////////////////
-        const vCollision = this.getVerticalCollision(rayAngle, rayDirection);
+        const vCollision = this.getVerticalCollision(rayAngle, rayXDirection);
         rayDataCombined.vRayLength = this.getRayLength(vCollision, rayAngle);
         rayDataCombined.vCollision = vCollision;
 
         const rayData = this.getClosestCollision(rayDataCombined);
+
         // if no collision was found, ray length is infinite
         // rayData.xRayLength = rayData.yRayLength = Number.MAX_VALUE;
 
+        // const rayData: IRayData = {
+        //     rayLength: 0,
+        //     collision: rayDataCombined.vCollision,
+        // };
         return rayData;
     }
 
     private getHorizontalCollision(rayAngle: number, rayYDirection: number): ICoords {
 
-        // space between two intersections
-        const yDelta = rayYDirection;  // should be tileSize*radDir but tsize is 1 so we can simplify here
-        let xDelta: number;
-
-        // check for quadrant
-        if (rayAngle > 0 && rayAngle < 90) {
-            // tan positive, yDelta negative: must be inverted (+ xDelta)
-            const rad = this.degToRad(rayAngle);  // should be removed when lookup tables are ready
-            xDelta = -(yDelta / Math.tan(rad));
-        } else if (rayAngle > 90 && rayAngle < 180) {
-            // tan positive, yDelta negative: must NOT be inverted (- xDelta)
-            const rad = this.degToRad(rayAngle);  // should be removed when lookup tables are ready
-            xDelta = yDelta / Math.tan(rad);
-        } else if (rayAngle > 180 && rayAngle < 270) {
-            // tan negative, yDelta positive: must NOT be inverted (- xDelta)
-            const rad = this.degToRad(rayAngle);  // should be removed when lookup tables are ready
-            xDelta = yDelta / Math.tan(rad);
-        } else {
-            // tan negative, yDelta positive: must be inverted (+ xDelta)
-            const rad = this.degToRad(rayAngle);  // should be removed when lookup tables are ready
-            xDelta = -(yDelta / Math.tan(rad));
-        }
-        // console.log(xDelta);
-        // console.log(yDelta / Math.tan(this.degToRad(330)));
-
         // find the 1st horizontal intersection
-        let xIntersection: number;
         let yIntersection: number;
-        let yFirstDelta: number;
-
         if (rayYDirection === 1) {
-            yIntersection = Math.floor(this.playerPosition.y) + this.tileSize;
-            yFirstDelta = yIntersection - this.playerPosition.y;
+            yIntersection = Math.floor(this.playerPosition.y) + rayYDirection;
         } else {
             yIntersection = Math.floor(this.playerPosition.y);
-            yFirstDelta = this.playerPosition.y - yIntersection;
         }
-
-        if (rayAngle > 0 && rayAngle < 90) {
-            // tan positive, yDelta negative: must be inverted (+ xDelta)
-            const xFirstDelta = -(yFirstDelta / Math.tan(this.degToRad(rayAngle)));
-            xIntersection = xFirstDelta + this.playerPosition.x;
-        } else if (rayAngle > 90 && rayAngle < 180) {
-            // tan positive, yDelta negative: must NOT be inverted (- xDelta)
-            const xFirstDelta = yFirstDelta / Math.tan(this.degToRad(rayAngle));
-            xIntersection = xFirstDelta + this.playerPosition.x;
-        } else if (rayAngle > 180 && rayAngle < 270) {
-            // tan negative, yDelta positive: must NOT be inverted (- xDelta)
-            const xFirstDelta = yFirstDelta / Math.tan(this.degToRad(rayAngle));
-            xIntersection = xFirstDelta + this.playerPosition.x;
-        } else {
-            // tan negative, yDelta positive: must be inverted (+ xDelta)
-            const xFirstDelta = -(yFirstDelta / Math.tan(this.degToRad(rayAngle)));
-            xIntersection = xFirstDelta + this.playerPosition.x;
-        }
-
-        // console.log(xIntersection + "  angle: " + rayAngle);
-        // console.log(Math.tan(this.degToRad(357)));
+        const yFirstDelta = yIntersection - this.playerPosition.y;
+        const xFirstDelta = -(yFirstDelta * this.tables.itan[rayAngle]);
+        const xIntersection = xFirstDelta + this.playerPosition.x;
 
         let intersection: ICoords = {
             x: xIntersection,
             y: yIntersection,
         };
-
-        // console.log(xIntersection + "  " + yIntersection);
-        // check if we have a collision and eventually return ray length
-        // if (intersection.x > 0 &&
-        //     intersection.y > 0 &&
-        //     intersection.x < this.mapWidth &&
-        //     intersection.y < this.mapHeight) {
-
-        //         if (this.getHorizontalCollisionTileType(intersection, rayYDirection) !== 0) {
-        //             // console.log("Hello");
-        //             return intersection;
-        //         }
-        //     }
 
         // find all other horizontal intersections
         while (intersection.y > 0 &&
@@ -173,104 +122,56 @@ export default class Raycaster {
 
             // next point can be found by simply adding deltaX and deltaY
             intersection = {
-                x: intersection.x + xDelta,
-                y: intersection.y + yDelta,
+                x: intersection.x + this.tables.xdelta[rayAngle],
+                y: intersection.y + rayYDirection,
             };
-
         }
 
-        // if no horizontal collision was found, return inf/inf
-        return { x: 0, y: 0 };
+        // if no horizontal collision was found, ray travels forever (in y)
+        return { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
     }
 
-    private getVerticalCollision(rayAngle: number, rayYDirection: number): ICoords {
-
-        // space between two intersections
-        let xDelta: number;
-        let yDelta: number;
-
-        if (rayAngle > 0 && rayAngle < 90) {
-            // tan positive, xDelta positive: must be inverted (- yDelta)
-            xDelta = this.tileSize;
-            yDelta = -(Math.tan(this.degToRad(rayAngle)) * xDelta);
-        } else if (rayAngle > 90 && rayAngle < 180) {
-            // tan positive, xDelta negative: must NOT be inverted (- yDelta)
-            xDelta = -this.tileSize;
-            yDelta = Math.tan(this.degToRad(rayAngle)) * xDelta;
-        } else if (rayAngle > 180 && rayAngle < 270) {
-            // tan negative, xDelta negative: must NOT be inverted (+ yDelta)
-            xDelta = -this.tileSize;
-            yDelta = Math.tan(this.degToRad(rayAngle)) * xDelta;
-        } else {
-            // tan negative, xDelta positive: must be inverted (+ yDelta)
-            xDelta = this.tileSize;
-            yDelta = -(Math.tan(this.degToRad(rayAngle)) * xDelta);
-        }
-
-        let xIntersection: number;
-        let yIntersection: number;
+    private getVerticalCollision(rayAngle: number, rayXDirection: number): ICoords {
 
         // find the 1st vertical intersection
-        if (rayAngle > 0 && rayAngle < 90) {
-            // tan positive, xDelta positive, rayDir neg: must NOT be inverted (- yDelta)
-            xIntersection = Math.floor(this.playerPosition.x) + this.tileSize;
-            const xIntersecDelta = xIntersection - this.playerPosition.x;
-            const yIntersecDelta = xIntersecDelta * Math.tan(this.degToRad(rayAngle)) * rayYDirection;
-            yIntersection = yIntersecDelta + this.playerPosition.y;
-        } else if (rayAngle > 90 && rayAngle < 180) {
-            // tan positive, xDelta negative, rayDir neg: must be inverted (- yDelta)
-            xIntersection = Math.floor(this.playerPosition.x);
-            const xIntersecDelta = this.playerPosition.x - xIntersection;
-            const yIntersecDelta = -(xIntersecDelta * Math.tan(this.degToRad(rayAngle)) * rayYDirection);
-            yIntersection = yIntersecDelta + this.playerPosition.y;
-        } else if (rayAngle > 180 && rayAngle < 270) {
-            // tan negative, xDelta negative, rayDir pos: must NOT be inverted (+ yDelta)
-            xIntersection = Math.floor(this.playerPosition.x);
-            const xIntersecDelta = this.playerPosition.x - xIntersection;
-            const yIntersecDelta = xIntersecDelta * Math.tan(this.degToRad(rayAngle)) * rayYDirection;
-            yIntersection = yIntersecDelta + this.playerPosition.y;
+        let xIntersection: number;
+        if (rayXDirection === 1) {
+            xIntersection = Math.floor(this.playerPosition.x) + rayXDirection;
         } else {
-            // tan negative, xDelta positive, rayDir pos: must be inverted (+ yDelta)
-            xIntersection = Math.floor(this.playerPosition.x) + this.tileSize;
-            const xIntersecDelta = xIntersection - this.playerPosition.x;
-            const yIntersecDelta = -(xIntersecDelta * Math.tan(this.degToRad(rayAngle)) * rayYDirection);
-            yIntersection = yIntersecDelta + this.playerPosition.y;
+            xIntersection = Math.floor(this.playerPosition.x);
         }
-
+        const xFirstDelta = xIntersection - this.playerPosition.x;
+        const yFirstDelta = -(xFirstDelta * this.tables.tan[rayAngle]);
+        const yIntersection = yFirstDelta + this.playerPosition.y;
         const intersection: ICoords = {
             x: xIntersection,
             y: yIntersection,
         };
 
-        // check if we have a collision and eventually return ray length
-        // if (this.getVerticalCollisionTileType(intersection, rayYDirection) !== 0) {
-        //     return intersection;
-        // }
 
-        // find all other horizontal intersections
+        // check for collision and do the same fora ll other horizontal intersections
         while (intersection.y > 0 &&
             intersection.y < this.mapHeight &&
             intersection.x > 0 &&
             intersection.x < this.mapWidth) {
 
             // check if we have a collision and eventually return ray length
-            if (this.getVerticalCollisionTileType(intersection, rayYDirection) !== 0) {
+            if (this.getVerticalCollisionTileType(intersection, rayXDirection) !== 0) {
+                // console.log(intersection.x);
                 return intersection;
             }
 
             // next point can be found by simply adding deltaX and deltaY
-            intersection.x += xDelta;
-            intersection.y += yDelta;
+            intersection.x += rayXDirection;
+            intersection.y += this.tables.ydelta[rayAngle];
         }
 
-        // if no vertical collision was found, return ray travels forever
-        return { x: 0, y: 0 };
+        // if no vertical collision was found, ray travels forever (in x)
+        return { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
     }
 
-    private getClosestCollision(xyData: IRayDataXYCombined): IRayData {
-        console.log("x-length: " + xyData.hRayLength);
-        console.log("y-length: " + xyData.vRayLength);
-        if (xyData.hRayLength > 0 && xyData.hRayLength < xyData.vRayLength) {
+    private getClosestCollision(xyData: IRayDataHVCombined): IRayData {
+        if (xyData.hRayLength < xyData.vRayLength) {
             return {
                 rayLength: xyData.hRayLength,
                 collision: xyData.hCollision,
@@ -281,10 +182,6 @@ export default class Raycaster {
                 collision: xyData.vCollision,
             };
         }
-    }
-
-    private degToRad(angle: number): number {
-        return angle * Math.PI / 180;
     }
 
     /**
@@ -303,22 +200,26 @@ export default class Raycaster {
         }
     }
 
-    private getVerticalCollisionTileType(intersection: ICoords, rayDir: number): number {
-        if (rayDir === 1) {
-            // console.log(intersection.y);
+    private getVerticalCollisionTileType(intersection: ICoords, rayXDir: number): number {
+        if (rayXDir === 1) {
             return this.mapData[Math.floor(intersection.y)][intersection.x];
         } else {
-            return this.mapData[Math.floor(intersection.y)][intersection.x];
+            return this.mapData[Math.floor(intersection.y)][intersection.x - 1];
         }
     }
 
     private getRayLength(collision: ICoords, rayAngle: number): number {
         let rayLength = 0;
 
+        // infinity in, infinity out (trigonometry doesn't work with inf)
+        if (collision.x === Number.MAX_VALUE) {
+            return Number.MAX_VALUE;
+        }
+
         if (rayAngle > 0 && rayAngle < 180) {
-            rayLength = (this.playerPosition.y - collision.y) / Math.sin(this.degToRad(rayAngle));
+            rayLength = (this.playerPosition.y - collision.y) / this.tables.sin[rayAngle];
         } else {
-            rayLength = -((collision.y - this.playerPosition.y) / Math.sin(this.degToRad(rayAngle)));
+            rayLength = -((collision.y - this.playerPosition.y) / this.tables.sin[rayAngle]);
         }
 
         return rayLength;

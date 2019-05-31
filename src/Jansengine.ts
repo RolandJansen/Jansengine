@@ -37,14 +37,15 @@ export default class Jansengine {
 
     public gameCycle() {
         this.player.move();
-        const rays = this.rayCaster.castRays(this.player.playerPosition, this.player.directionAngle);
-        console.log(rays);
-        this.map.updateMiniPlayer(this.player.playerPosition, this.player.directionAngle);
+        const rays = this.rayCaster.castRays(this.player.playerPosition, this.player.direction);
+        // console.log(rays);
+        this.map.updateMiniPlayer(this.player.playerPosition, this.player.direction);
         this.map.updateRays(this.player.playerPosition, rays);
+        this.map.updatePlayerDirection(this.player.playerPosition, this.player.direction);
 
-        // setTimeout(() => {
-        //     this.gameCycle();
-        // }, 1000 / 30);
+        setTimeout(() => {
+            this.gameCycle();
+        }, 1000 / 30);
     }
 
     public loadMap(mapData: number[][]) {

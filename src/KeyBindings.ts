@@ -15,16 +15,16 @@ export default class KeyBindings {
         e.preventDefault();
         switch(e.code) {
             case "KeyW":
-            this.player.walk = 1;
+            this.player.walkForBack = 1;
             break;
             case "KeyS":
-            this.player.walk = -1;
+            this.player.walkForBack = -1;
             break;
             case "KeyA":
-            this.player.rotate = -1;
+            this.player.rotateLeftRight = 1;
             break;
             case "KeyD":
-            this.player.rotate = 1;
+            this.player.rotateLeftRight = -1;
             break;
         }
         // console.log("Keydown: " + e.key + ", " + e.keyCode);
@@ -35,11 +35,11 @@ export default class KeyBindings {
         switch(e.code) {
             case "KeyW":
             case "KeyS":
-            this.player.walk = 0;
+            this.player.walkForBack = 0;
             break;
             case "KeyA":
             case "KeyD":
-            this.player.rotate = 0;
+            this.player.rotateLeftRight = 0;
             break;
         }
         // console.log("Keyup: " + e.key + ", " + e.code);

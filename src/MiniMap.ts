@@ -1,4 +1,5 @@
-import { ICoords, IRayData } from "./interfaces";
+import { ICoords, ILookupTables, IRayData } from "./interfaces";
+import { getLookupTables } from "./lookupTables";
 import ProjectionScreen from "./ProjectionScreen";
 
 export default class MiniMap {
@@ -12,8 +13,10 @@ export default class MiniMap {
     private heightInBlocks: number;
     private mapWidth: number;
     private mapHeight: number;
+    private tables: ILookupTables;
 
     constructor(private mapData: number[][], screen: ProjectionScreen) {
+        this.tables = getLookupTables();
         this.mapCtx = screen.getMiniMapContext();
         this.playerCtx = screen.getMiniPlayerContext();
 
@@ -30,11 +33,14 @@ export default class MiniMap {
     public updateMiniPlayer(playerPosition: ICoords, playerDirection: number) {
         this.clearPlayerCanvas();
         this.drawPlayer(playerPosition);
+    }
+
+    public updatePlayerDirection(playerPosition: ICoords, playerDirection: number) {
         this.drawPlayerDirection(playerPosition, playerDirection);
     }
 
     public updateRays(playerPosition: ICoords, rays: IRayData[]) {
-
+        this.playerCtx.strokeStyle = "#090779";
         for (const ray of rays) {
             this.playerCtx.beginPath();
             this.playerCtx.moveTo(
@@ -73,14 +79,15 @@ export default class MiniMap {
      * @param playerDirection angle where the player is looking at
      */
     private drawPlayerDirection(playerPosition: ICoords, playerDirection: number) {
+        this.playerCtx.strokeStyle = "#ad0000";
         this.playerCtx.beginPath();
         this.playerCtx.moveTo(
             playerPosition.x * this.miniMapBlockWidth,
             playerPosition.y * this.miniMapBlockWidth,
         );
         this.playerCtx.lineTo(
-            (playerPosition.x + Math.cos(playerDirection) * this.playerEdgeLength) * this.miniMapBlockWidth,
-            (playerPosition.y + Math.sin(playerDirection) * this.playerEdgeLength) * this.miniMapBlockWidth,
+            (playerPosition.x + this.tables.cos[playerDirection] * this.playerEdgeLength) * this.miniMapBlockWidth,
+            (playerPosition.y - this.tables.sin[playerDirection] * this.playerEdgeLength) * this.miniMapBlockWidth,
         )
         this.playerCtx.closePath();
         this.playerCtx.stroke();
