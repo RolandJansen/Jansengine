@@ -4,6 +4,7 @@ import MiniMap from "./MiniMap";
 import Player from "./Player";
 import ProjectionScreen from "./ProjectionScreen";
 import Raycaster from "./Raycaster";
+import Renderer from "./Renderer";
 
 /**
  * Main class of the engine.
@@ -20,6 +21,7 @@ export default class Jansengine {
     private player!: Player;
     private keyBindings!: KeyBindings;
     private rayCaster!: Raycaster;
+    private renderer: Renderer;
 
     constructor(containerName: string, engineOptions?: IEngineOptions) {
 
@@ -33,15 +35,18 @@ export default class Jansengine {
         } else {
             this.screen = new ProjectionScreen(containerName);
         }
+
+        this.renderer = new Renderer(this.screen, 60);
     }
 
     public gameCycle() {
         this.player.move();
         const rays = this.rayCaster.castRays(this.player.playerPosition, this.player.direction);
         // console.log(rays);
-        this.map.updateMiniPlayer(this.player.playerPosition, this.player.direction);
-        this.map.updateRays(this.player.playerPosition, rays);
-        this.map.updatePlayerDirection(this.player.playerPosition, this.player.direction);
+        // this.map.updateMiniPlayer(this.player.playerPosition, this.player.direction);
+        // this.map.updateRays(this.player.playerPosition, rays);
+        // this.map.updatePlayerDirection(this.player.playerPosition, this.player.direction);
+        this.renderer.render(rays);
 
         setTimeout(() => {
             this.gameCycle();

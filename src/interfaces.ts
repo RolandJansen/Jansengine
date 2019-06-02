@@ -25,10 +25,3 @@ export interface IRayData {
     rayLength: number;
     collision: ICoords;
 }
-
-export interface IRayDataHVCombined {
-    hRayLength: number;
-    vRayLength: number;
-    hCollision: ICoords;
-    vCollision: ICoords;
-}

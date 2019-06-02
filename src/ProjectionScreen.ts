@@ -2,6 +2,7 @@ import { ICanvasStack, ICanvasSize } from "./interfaces";
 
 export default class ProjectionScreen {
 
+    private container: HTMLElement;
     private canvasStack: ICanvasStack;
     private canvasSize: ICanvasSize = {
         width: 640,
@@ -9,6 +10,7 @@ export default class ProjectionScreen {
     };
 
     constructor(containerName: string, canvasSize?: ICanvasSize) {
+
         const container = document.getElementById(containerName);
 
         if (canvasSize) {
@@ -16,18 +18,25 @@ export default class ProjectionScreen {
         }
 
         if (container !== null && container.tagName === "DIV") {
+            this.container = container;
             this.canvasStack = this.getNewCanvasStack();
 
             if (this.isCanvas(this.canvasStack.game)) {
+                this.setContainerProperties();
                 this.setCanvasStackProperties();
-                this.addCanvasElementsToDom(container);
+                this.addCanvasElementsToDom(this.container);
             } else {
-                throw new Error('Your browser doesn\'t support the <canvas> element.');
+                throw new Error("Your browser doesn\'t support the <canvas> element.");
             }
 
         } else {
             throw new Error(`${containerName} is not a <div> element.`);
         }
+    }
+
+    public setBackgroundColor(color: string) {
+        // there should be a check if color is syntactically a color
+        this.container.style.backgroundColor = color;
     }
 
     public getGameContext(): CanvasRenderingContext2D {
@@ -44,6 +53,13 @@ export default class ProjectionScreen {
 
     public setFocusOnGame() {
         this.setFocusToCanvas(this.canvasStack.game);
+    }
+
+    private setContainerProperties() {
+        this.container.style.width = this.canvasSize.width + "px";
+        this.container.style.height = this.canvasSize.height + "px";
+        this.container.style.border = "2px solid black";
+        this.setBackgroundColor("lightgray");
     }
 
     private getNewCanvasStack(): ICanvasStack {

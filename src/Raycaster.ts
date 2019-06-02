@@ -40,12 +40,6 @@ export default class Raycaster {
     }
 
     private castRayAt(rayAngle: number): IRayData {
-        const rayDataCombined: IRayDataHVCombined = {
-            hRayLength: 0,
-            vRayLength: 0,
-            hCollision: { x: 0, y: 0 },
-            vCollision: { x: 0, y: 0 },
-        };
 
         // make shure we're between 0° and 359°
         if (rayAngle < 0) {
@@ -68,27 +62,24 @@ export default class Raycaster {
         ////////////////////////////
         // horizontal intersections
         ////////////////////////////
-        const hCollision = this.getHorizontalCollision(rayAngle, rayYDirection);
-        rayDataCombined.hRayLength = this.getRayLength(hCollision, rayAngle);
-        rayDataCombined.hCollision = hCollision;
+        const hCollisionCoords = this.getHorizontalCollision(rayAngle, rayYDirection);
+        const hRayLength = this.getRayLength(hCollisionCoords, rayAngle);
+        const hCollision: IRayData = {
+            rayLength: hRayLength,
+            collision: hCollisionCoords,
+        };
 
         ////////////////////////////
         // vertical intersections
         ////////////////////////////
-        const vCollision = this.getVerticalCollision(rayAngle, rayXDirection);
-        rayDataCombined.vRayLength = this.getRayLength(vCollision, rayAngle);
-        rayDataCombined.vCollision = vCollision;
+        const vCollisionCoords = this.getVerticalCollision(rayAngle, rayXDirection);
+        const vRayLength = this.getRayLength(vCollisionCoords, rayAngle);
+        const vCollision: IRayData = {
+            rayLength: vRayLength,
+            collision: vCollisionCoords,
+        };
 
-        const rayData = this.getClosestCollision(rayDataCombined);
-
-        // if no collision was found, ray length is infinite
-        // rayData.xRayLength = rayData.yRayLength = Number.MAX_VALUE;
-
-        // const rayData: IRayData = {
-        //     rayLength: 0,
-        //     collision: rayDataCombined.vCollision,
-        // };
-        return rayData;
+        return this.getClosestCollision(hCollision, vCollision);
     }
 
     private getHorizontalCollision(rayAngle: number, rayYDirection: number): ICoords {
@@ -170,17 +161,11 @@ export default class Raycaster {
         return { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
     }
 
-    private getClosestCollision(xyData: IRayDataHVCombined): IRayData {
-        if (xyData.hRayLength < xyData.vRayLength) {
-            return {
-                rayLength: xyData.hRayLength,
-                collision: xyData.hCollision,
-            };
+    private getClosestCollision(collisionData1: IRayData, collisionData2: IRayData): IRayData {
+        if (collisionData1.rayLength < collisionData2.rayLength) {
+            return collisionData1;
         } else {
-            return {
-                rayLength: xyData.vRayLength,
-                collision: xyData.vCollision,
-            };
+            return collisionData2;
         }
     }
 
@@ -223,6 +208,10 @@ export default class Raycaster {
         }
 
         return rayLength;
+    }
+
+    private compensateFishbowl(rayLength: number, degree: number) {
+        return rayLength * this.tables.cos[degree];
     }
 
 }

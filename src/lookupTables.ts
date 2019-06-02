@@ -21,6 +21,7 @@ const tables: ILookupTables = {
     itan: [],
     xdelta: [],
     ydelta: [],
+    fishbowl: [],
 };
 
 function initLookupTables() {
@@ -31,7 +32,8 @@ function initLookupTables() {
         // Populate tables with their radian values.
         // (The addition of 0.0001 is a kludge to avoid divisions by 0.
         // Removing it will produce unwanted holes in the wall when a
-        // ray is at 0, 90, 180, or 270 degree angles)
+        // ray is at 0, 90, 180, or 270 degree angles). See:
+        // https://github.com/permadi-com/ray-cast/blob/master/demo/1/sample1.js
         const radian = arcToRad(i) + (0.0001);
 
         tables.sin[i] = Math.sin(radian);
@@ -44,7 +46,7 @@ function initLookupTables() {
         tables.xdelta[i] = getXIntersectionDelta(i);
         tables.ydelta[i] = getYIntersectionDelta(i);
 
-        // console.log(i + " :" +  tables.ydelta[i]);
+        tables.fishbowl[i] = getFishbowlCorrection(i);
     }
 }
 
@@ -81,6 +83,11 @@ function getYIntersectionDelta(degree: number): number {
         delta = -delta;
     }
     return delta;
+}
+
+function getFishbowlCorrection(degree: number): number {
+    const radian = arcToRad(degree);
+    return 1 / Math.cos(radian);
 }
 
 function arcToRad(arcAngle: number) {
