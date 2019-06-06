@@ -1,16 +1,21 @@
-import { ICoords, ILookupTables, IRayData, IRayDataHVCombined } from "./interfaces";
+import { ICoords, ILookupTables, IRayData, ISettings } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
+import { getAngles, getSettings } from "./settings";
 
 export default class Raycaster {
     private readonly mapWidth: number;
     private readonly mapHeight: number;
-    private tables: ILookupTables;
+    private readonly settings: ISettings;
+    private readonly a: ISettings;
+    private readonly tables: ILookupTables;
 
     constructor(
         private readonly mapData: number[][],
         private readonly tileSize: number,
         private playerPosition: ICoords) {
 
+            this.settings = getSettings();
+            this.a = getAngles();
             this.tables = getLookupTables();
             this.mapWidth = this.mapData[0].length;
             this.mapHeight = this.mapData.length;
@@ -19,21 +24,21 @@ export default class Raycaster {
 
     public castRays(playerPosition: ICoords, direction: number): IRayData[] {
 
-        // console.log(directionAngle);
         const rays: IRayData[] = [];
-        const colums = 320;
-        const columAngleDelta = 60 / 320;
-        let rayAngleDeg = direction - 30;
+        let rayAngle = direction - this.a.angle30;
 
         this.playerPosition = playerPosition;
 
-        for (let i = 0; i < 60; i++) {
-        // for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < this.settings.screen.width; i++) {
             // we commit the rayData object to the castRayAt method
             // so the arrays can be populated. Normally this is not a
             // good approach but we do it here for the sake of performance.
-            rays[i] = this.castRayAt(rayAngleDeg);
-            rayAngleDeg += 1;
+            const ray = this.castRayAt(rayAngle);
+
+            ray.rayLength = this.tables.fishbowl[i] * ray.rayLength;
+
+            rays[i] = ray;
+            rayAngle += 1;
         }
 
         return rays;
@@ -43,19 +48,19 @@ export default class Raycaster {
 
         // make shure we're between 0° and 359°
         if (rayAngle < 0) {
-            rayAngle += 360;
+            rayAngle += this.a.angle360;
         }
-        if (rayAngle >= 360) {
-            rayAngle -= 360;
+        if (rayAngle >= this.a.angle360) {
+            rayAngle -= this.a.angle360;
         }
 
         let rayYDirection = 1; // ray is facing up
-        if (rayAngle >= 0 && rayAngle < 180) {  // ray is facing down
+        if (rayAngle >= 0 && rayAngle < this.a.angle180) {  // ray is facing down
             rayYDirection = -1;
         }
 
         let rayXDirection = 1; // ray is facing left
-        if (rayAngle >= 90 && rayAngle < 270) {  // ray is facing right
+        if (rayAngle >= this.a.angle90 && rayAngle < this.a.angle270) {  // ray is facing right
             rayXDirection = -1;
         }
 
@@ -148,7 +153,6 @@ export default class Raycaster {
 
             // check if we have a collision and eventually return ray length
             if (this.getVerticalCollisionTileType(intersection, rayXDirection) !== 0) {
-                // console.log(intersection.x);
                 return intersection;
             }
 
@@ -201,17 +205,13 @@ export default class Raycaster {
             return Number.MAX_VALUE;
         }
 
-        if (rayAngle > 0 && rayAngle < 180) {
+        if (rayAngle > 0 && rayAngle < this.a.angle180) {
             rayLength = (this.playerPosition.y - collision.y) / this.tables.sin[rayAngle];
         } else {
             rayLength = -((collision.y - this.playerPosition.y) / this.tables.sin[rayAngle]);
         }
 
         return rayLength;
-    }
-
-    private compensateFishbowl(rayLength: number, degree: number) {
-        return rayLength * this.tables.cos[degree];
     }
 
 }

@@ -1,12 +1,12 @@
 import { ILookupTables } from "./interfaces";
+import { getAngles } from "./settings";
 
 // This is basically the same as in the tutorial by F. Permadi:
 // https://github.com/permadi-com/ray-cast
 // The idea is to pre-compute as much data as possible and
 // lookup the values in the game loop.
-//
-// We could do this more efficiently in one loop
-// but
+
+const a = getAngles();
 
 // pre-computed values for every degree from 0 to 360
 // i prefix means inverted which means 1/x. This is
@@ -27,7 +27,7 @@ const tables: ILookupTables = {
 function initLookupTables() {
 
     // 361 records because: 360deg + 0deg
-    for (let i = 0; i <= 360; i++) {
+    for (let i = 0; i <= a.angle360; i++) {
 
         // Populate tables with their radian values.
         // (The addition of 0.0001 is a kludge to avoid divisions by 0.
@@ -45,9 +45,12 @@ function initLookupTables() {
 
         tables.xdelta[i] = getXIntersectionDelta(i);
         tables.ydelta[i] = getYIntersectionDelta(i);
-
-        tables.fishbowl[i] = getFishbowlCorrection(i);
     }
+
+    for (let i = -a.angle30; i <= a.angle30; i++) {
+        tables.fishbowl[i + a.angle30] = getFishbowlCorrection(i);
+    }
+
 }
 
 /**
@@ -62,7 +65,8 @@ function initLookupTables() {
 function getXIntersectionDelta(degree: number): number {
     let delta = tables.itan[degree];
 
-    if ((degree >= 180 && degree < 270) || degree > 270) {
+    // can't we just do (>=180 && <360)?
+    if ((degree >= a.angle180 && degree < a.angle270) || degree > a.angle270) {
         delta = -delta;
     }
     return delta;
@@ -79,7 +83,7 @@ function getXIntersectionDelta(degree: number): number {
 function getYIntersectionDelta(degree: number): number {
     let delta = tables.tan[degree];
 
-    if ((degree >= 0 && degree < 90) || degree >= 270) {
+    if ((degree >= 0 && degree < a.angle90) || degree >= a.angle270) {
         delta = -delta;
     }
     return delta;
@@ -87,11 +91,11 @@ function getYIntersectionDelta(degree: number): number {
 
 function getFishbowlCorrection(degree: number): number {
     const radian = arcToRad(degree);
-    return 1 / Math.cos(radian);
+    return Math.cos(radian);
 }
 
 function arcToRad(arcAngle: number) {
-    return ((arcAngle * Math.PI) / 180);
+    return ((arcAngle * Math.PI) / a.angle180);
 }
 
 export function getLookupTables(): ILookupTables {

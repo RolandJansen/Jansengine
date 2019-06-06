@@ -7,6 +7,10 @@ export interface ICanvasStack {
     [canvasName: string]: HTMLCanvasElement;
 }
 
+export interface ISettings {
+    [settingName: string]: any;
+}
+
 export interface ILookupTables {
     [tableName: string]: number[];
 }

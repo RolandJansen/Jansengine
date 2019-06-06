@@ -1,5 +1,6 @@
-import { ICoords, ILookupTables } from "./interfaces";
+import { ICoords, ILookupTables, ISettings } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
+import { getAngles } from "./settings";
 
 export default class Player {
 
@@ -11,11 +12,12 @@ export default class Player {
     public movementSpeed = 0.18;
     public rotateLeftRight = 0;  // left = 1, right = -1 (degree)
     public walkForBack = 0; // backward = -1, forward = 1
-    public rotationSpeed = 3;  // degrees per game cycle
+    public rotationSpeed = 24;  // degrees per game cycle
 
-    private mapWidth: number;
-    private mapHeight: number;
-    private tables: ILookupTables;
+    private readonly mapWidth: number;
+    private readonly mapHeight: number;
+    private readonly tables: ILookupTables;
+    private readonly a: ISettings;
 
     constructor(private mapData: number[][], initialPlayerPos?: ICoords) {
         if (initialPlayerPos) {
@@ -25,6 +27,7 @@ export default class Player {
         this.mapWidth = mapData[0].length;
         this.mapHeight = mapData.length;
         this.tables = getLookupTables();
+        this.a = getAngles();
     }
 
     public move() {
@@ -32,11 +35,11 @@ export default class Player {
         this.direction += this.rotateLeftRight * this.rotationSpeed;
 
         if (this.direction < 0) {
-            this.direction += 360;
+            this.direction += this.a.angle360;
         }
-        if (this.direction >= 360) {
+        if (this.direction >= this.a.angle360) {
             // maybe modulo is cheaper (?)
-            this.direction -= 360;
+            this.direction -= this.a.angle360;
         }
 
         const x = this.playerPosition.x + this.tables.cos[this.direction] * stepDistance;

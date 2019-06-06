@@ -1,10 +1,11 @@
-import { IEngineOptions } from "./interfaces";
+import { IEngineOptions, ISettings } from "./interfaces";
 import KeyBindings from "./KeyBindings";
 import MiniMap from "./MiniMap";
 import Player from "./Player";
 import ProjectionScreen from "./ProjectionScreen";
 import Raycaster from "./Raycaster";
 import Renderer from "./Renderer";
+import { getSettings } from "./settings";
 
 /**
  * Main class of the engine.
@@ -16,6 +17,7 @@ import Renderer from "./Renderer";
  */
 export default class Jansengine {
 
+    private settings: ISettings;
     private screen!: ProjectionScreen;
     private map!: MiniMap;
     private player!: Player;
@@ -24,6 +26,7 @@ export default class Jansengine {
     private renderer: Renderer;
 
     constructor(containerName: string, engineOptions?: IEngineOptions) {
+        this.settings = getSettings();
 
         if (engineOptions) {
             if (engineOptions.canvasSize) {
@@ -36,7 +39,7 @@ export default class Jansengine {
             this.screen = new ProjectionScreen(containerName);
         }
 
-        this.renderer = new Renderer(this.screen, 60);
+        this.renderer = new Renderer(this.screen);
     }
 
     public gameCycle() {
