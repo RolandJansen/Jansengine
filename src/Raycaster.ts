@@ -1,4 +1,4 @@
-import { ICoords, ILookupTables, IRayData, ISettings } from "./interfaces";
+import { ICollision, ICoords, ILookupTables, IRayData, ISettings } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import { getAngles, getSettings } from "./settings";
 
@@ -67,27 +67,33 @@ export default class Raycaster {
         ////////////////////////////
         // horizontal intersections
         ////////////////////////////
-        const hCollisionCoords = this.getHorizontalCollision(rayAngle, rayYDirection);
-        const hRayLength = this.getRayLength(hCollisionCoords, rayAngle);
-        const hCollision: IRayData = {
+        const hCollision = this.getHorizontalCollision(rayAngle, rayYDirection);
+        const hRayLength = this.getRayLength(hCollision.intersection, rayAngle);
+        const hRayData: IRayData = {
             rayLength: hRayLength,
-            collision: hCollisionCoords,
+            collision: hCollision.intersection,
+            type: "h",
+            tile: hCollision.tileType,
+            tileOffset: hCollision.intersection.x % 1,
         };
 
         ////////////////////////////
         // vertical intersections
         ////////////////////////////
-        const vCollisionCoords = this.getVerticalCollision(rayAngle, rayXDirection);
-        const vRayLength = this.getRayLength(vCollisionCoords, rayAngle);
-        const vCollision: IRayData = {
+        const vCollision = this.getVerticalCollision(rayAngle, rayXDirection);
+        const vRayLength = this.getRayLength(vCollision.intersection, rayAngle);
+        const vRayData: IRayData = {
             rayLength: vRayLength,
-            collision: vCollisionCoords,
+            collision: vCollision.intersection,
+            type: "v",
+            tile: vCollision.tileType,
+            tileOffset: vCollision.intersection.y % 1,
         };
 
-        return this.getClosestCollision(hCollision, vCollision);
+        return this.getClosestCollision(hRayData, vRayData);
     }
 
-    private getHorizontalCollision(rayAngle: number, rayYDirection: number): ICoords {
+    private getHorizontalCollision(rayAngle: number, rayYDirection: number): ICollision {
 
         // find the 1st horizontal intersection
         let yIntersection: number;
@@ -112,11 +118,12 @@ export default class Raycaster {
             intersection.x < this.mapWidth) {
 
             // check if we have a collision and eventually return ray length
-            if (this.getHorizontalCollisionTileType(intersection, rayYDirection) !== 0) {
-                return intersection;
+            const tileType = this.getHorizontalCollisionTileType(intersection, rayYDirection);
+            if (tileType !== 0) {
+                return { intersection, tileType };
             }
 
-            // next point can be found by simply adding deltaX and deltaY
+            // next point can be found by simply adding delta
             intersection = {
                 x: intersection.x + this.tables.xdelta[rayAngle],
                 y: intersection.y + rayYDirection,
@@ -124,10 +131,13 @@ export default class Raycaster {
         }
 
         // if no horizontal collision was found, ray travels forever (in y)
-        return { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
+        return {
+            intersection: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
+            tileType: 0,
+        };
     }
 
-    private getVerticalCollision(rayAngle: number, rayXDirection: number): ICoords {
+    private getVerticalCollision(rayAngle: number, rayXDirection: number): ICollision {
 
         // find the 1st vertical intersection
         let xIntersection: number;
@@ -144,7 +154,6 @@ export default class Raycaster {
             y: yIntersection,
         };
 
-
         // check for collision and do the same fora ll other horizontal intersections
         while (intersection.y > 0 &&
             intersection.y < this.mapHeight &&
@@ -152,17 +161,21 @@ export default class Raycaster {
             intersection.x < this.mapWidth) {
 
             // check if we have a collision and eventually return ray length
-            if (this.getVerticalCollisionTileType(intersection, rayXDirection) !== 0) {
-                return intersection;
+            const tileType = this.getVerticalCollisionTileType(intersection, rayXDirection);
+            if ( tileType !== 0) {
+                return { intersection, tileType };
             }
 
-            // next point can be found by simply adding deltaX and deltaY
+            // next point can be found by simply adding delta
             intersection.x += rayXDirection;
             intersection.y += this.tables.ydelta[rayAngle];
         }
 
         // if no vertical collision was found, ray travels forever (in x)
-        return { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
+        return {
+            intersection: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
+            tileType: 0,
+        };
     }
 
     private getClosestCollision(collisionData1: IRayData, collisionData2: IRayData): IRayData {

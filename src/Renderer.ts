@@ -1,6 +1,7 @@
 import { IRayData, ISettings } from "./interfaces";
 import ProjectionScreen from "./ProjectionScreen";
 import { getSettings } from "./settings";
+import Texture from "./Texture";
 
 export default class Renderer {
 
@@ -8,8 +9,10 @@ export default class Renderer {
     private screenWidth = 320;
     private screenHeight = 200;
     private rayHSpace: number;
-    private readonly planeDistance = 4.328125;
+    // private readonly planeDistance = 4.328125;
+    private readonly planeDistance = 1.5;  // why 1.5? (found this out by surprise)
     private readonly settings: ISettings;
+    private textures: Texture[] = [];
 
     constructor(screen: ProjectionScreen) {
         this.ctx = screen.getGameContext();
@@ -33,7 +36,7 @@ export default class Renderer {
         let lineNum = 0;
 
         for (; lineNum < this.screenHeight / 2; lineNum++) {
-            const color = `rgb(140, 140, ${c})`;
+            const color = `rgb(120, 120, ${c})`;
             this.drawHorizontalLine(lineNum, color);
             c--;
         }
@@ -53,12 +56,29 @@ export default class Renderer {
         }
     }
 
-    public drawLines(rays: IRayData[]) {
+    public addTexture(texture: Texture, tileType?: number) {
+        if (tileType) {
+            this.textures[tileType - 1] = texture;
+        } else {
+            this.textures.push(texture);
+        }
+    }
+
+    public getTexture(tileType: number): Texture {
+        return this.textures[tileType - 1];
+    }
+
+    private drawLines(rays: IRayData[]) {
         let nextRayAt = 1;
         let ray: IRayData;
 
         for (ray of rays) {
-            const green = this.addDistanceShadow(ray.rayLength);
+            // let green = this.addDistanceShadow(ray.rayLength);
+            let green = 220;
+
+            if (ray.type === "h") {
+                green -= 30;
+            }
             this.ctx.strokeStyle = `rgb(0, ${green}, 0)`;
 
             this.drawLine(ray.rayLength, nextRayAt);

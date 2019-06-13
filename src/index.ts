@@ -1,4 +1,5 @@
 import Jansengine from "./Jansengine";
+import Texture from "./Texture";
 // the main file
 
 // function createAPI() {
@@ -10,8 +11,8 @@ import Jansengine from "./Jansengine";
 //     };
 // }
 
+// export default createAPI();
+
 export function getInstance(elementId: string) {
     return new Jansengine(elementId);
 }
-
-// export default createAPI();

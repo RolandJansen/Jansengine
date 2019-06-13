@@ -12,7 +12,7 @@ export default class Player {
     public movementSpeed = 0.18;
     public rotateLeftRight = 0;  // left = 1, right = -1 (degree)
     public walkForBack = 0; // backward = -1, forward = 1
-    public rotationSpeed = 24;  // degrees per game cycle
+    public rotationSpeed = 34;  // degrees per game cycle
 
     private readonly mapWidth: number;
     private readonly mapHeight: number;

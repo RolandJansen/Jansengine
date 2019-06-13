@@ -12,6 +12,8 @@
         function init() {
             const game = jansengine.getInstance("demo");
             game.loadMap(demo.levelMap);
+            game.addTexture("./images/tile07.jpg", 1);
+            game.addTexture("./images/tile13.jpg", 2);
             game.gameCycle();
         }
     </script>

@@ -28,4 +28,12 @@ export interface ICanvasSize {
 export interface IRayData {
     rayLength: number;
     collision: ICoords;
+    type: string;        // "v" for vertical, "h" for horizontal
+    tile: number;
+    tileOffset: number;
+}
+
+export interface ICollision {
+    intersection: ICoords;
+    tileType: number;
 }
