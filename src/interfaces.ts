@@ -1,23 +1,31 @@
+export interface IEngineOptions {
+    pov: number;
+    fov: number;
+    canvasSize: ICanvasSize;
+    map?: number[][];
+}
+
 export interface ICoords {
     x: number;
     y: number;
 }
 
+export interface ITile {
+    tile: ICoords;          // base coord (vector) of a tile
+    tileType: number;       // type of tile (wall, floor, etc)
+}
+
+export interface ICollision extends ITile {
+    collision: ICoords;     // vector of the collision point
+}
+
+export interface IRayData extends ICollision {
+    rayLength: number;      // scalar distance between player and wall
+    collisionType: string;  // "v" for vertical-, "h" for horizontal-collision
+}
+
 export interface ICanvasStack {
     [canvasName: string]: HTMLCanvasElement;
-}
-
-export interface ISettings {
-    [settingName: string]: any;
-}
-
-export interface ILookupTables {
-    [tableName: string]: number[];
-}
-
-export interface IEngineOptions {
-    canvasSize?: ICanvasSize,
-    map?: number[][];
 }
 
 export interface ICanvasSize {
@@ -25,15 +33,17 @@ export interface ICanvasSize {
     height: number;
 }
 
-export interface IRayData {
-    rayLength: number;
-    collision: ICoords;
-    type: string;        // "v" for vertical, "h" for horizontal
-    tile: number;
-    tileOffset: number;
+export interface ILookupTables {
+    [tableName: string]: number[];
 }
 
-export interface ICollision {
-    intersection: ICoords;
-    tileType: number;
+export interface IRadiants {
+    [radian: string]: number;
+}
+
+export interface IPixel {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
 }

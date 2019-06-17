@@ -1,12 +1,12 @@
-import { ICollision, ICoords, ILookupTables, IRayData, ISettings } from "./interfaces";
+import { ICollision, ICoords, IEngineOptions, ILookupTables, IRadiants, IRayData, ITile } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import { getAngles, getSettings } from "./settings";
 
 export default class Raycaster {
     private readonly mapWidth: number;
     private readonly mapHeight: number;
-    private readonly settings: ISettings;
-    private readonly a: ISettings;
+    private readonly settings: IEngineOptions;
+    private readonly a: IRadiants;
     private readonly tables: ILookupTables;
 
     constructor(
@@ -29,7 +29,7 @@ export default class Raycaster {
 
         this.playerPosition = playerPosition;
 
-        for (let i = 0; i < this.settings.screen.width; i++) {
+        for (let i = 0; i < this.settings.canvasSize.width; i++) {
             // we commit the rayData object to the castRayAt method
             // so the arrays can be populated. Normally this is not a
             // good approach but we do it here for the sake of performance.
@@ -68,27 +68,21 @@ export default class Raycaster {
         // horizontal intersections
         ////////////////////////////
         const hCollision = this.getHorizontalCollision(rayAngle, rayYDirection);
-        const hRayLength = this.getRayLength(hCollision.intersection, rayAngle);
-        const hRayData: IRayData = {
+        const hRayLength = this.getRayLength(hCollision.collision, rayAngle);
+        const hRayData: IRayData = Object.assign(hCollision, {
             rayLength: hRayLength,
-            collision: hCollision.intersection,
-            type: "h",
-            tile: hCollision.tileType,
-            tileOffset: hCollision.intersection.x % 1,
-        };
+            collisionType: "h",
+        });
 
         ////////////////////////////
         // vertical intersections
         ////////////////////////////
         const vCollision = this.getVerticalCollision(rayAngle, rayXDirection);
-        const vRayLength = this.getRayLength(vCollision.intersection, rayAngle);
-        const vRayData: IRayData = {
+        const vRayLength = this.getRayLength(vCollision.collision, rayAngle);
+        const vRayData: IRayData = Object.assign(vCollision, {
             rayLength: vRayLength,
-            collision: vCollision.intersection,
-            type: "v",
-            tile: vCollision.tileType,
-            tileOffset: vCollision.intersection.y % 1,
-        };
+            collisionType: "v",
+        });
 
         return this.getClosestCollision(hRayData, vRayData);
     }
@@ -118,9 +112,9 @@ export default class Raycaster {
             intersection.x < this.mapWidth) {
 
             // check if we have a collision and eventually return ray length
-            const tileType = this.getHorizontalCollisionTileType(intersection, rayYDirection);
-            if (tileType !== 0) {
-                return { intersection, tileType };
+            const tile = this.getHorizontalCollisionTile(intersection, rayYDirection);
+            if (tile.tileType !== 0) {
+                return Object.assign(tile, { collision: intersection });
             }
 
             // next point can be found by simply adding delta
@@ -132,8 +126,9 @@ export default class Raycaster {
 
         // if no horizontal collision was found, ray travels forever (in y)
         return {
-            intersection: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
-            tileType: 0,
+            tile: { x: -1, y: -1 },
+            tileType: -1,
+            collision: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
         };
     }
 
@@ -161,9 +156,9 @@ export default class Raycaster {
             intersection.x < this.mapWidth) {
 
             // check if we have a collision and eventually return ray length
-            const tileType = this.getVerticalCollisionTileType(intersection, rayXDirection);
-            if ( tileType !== 0) {
-                return { intersection, tileType };
+            const tile = this.getVerticalCollisionTile(intersection, rayXDirection);
+            if ( tile.tileType !== 0) {
+                return Object.assign(tile, { collision: intersection });
             }
 
             // next point can be found by simply adding delta
@@ -173,8 +168,9 @@ export default class Raycaster {
 
         // if no vertical collision was found, ray travels forever (in x)
         return {
-            intersection: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
-            tileType: 0,
+            tile: { x: -1, y: -1 },
+            tileType: -1,
+            collision: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
         };
     }
 
@@ -194,20 +190,42 @@ export default class Raycaster {
      * @param rayDir +1 if ray going up, -1 if ray going down
      * @return Type of tile
      */
-    private getHorizontalCollisionTileType(intersection: ICoords, rayDir: number): number {
+    private getHorizontalCollisionTile(intersection: ICoords, rayDir: number): ITile {
+        let tile: ICoords;
+
         if (rayDir === 1) {
-            return this.mapData[intersection.y][Math.floor(intersection.x)];
+            tile = {
+                x: Math.floor(intersection.x),
+                y: intersection.y,
+            };
         } else {
-            return this.mapData[intersection.y - 1][Math.floor(intersection.x)];
+            tile = {
+                x: Math.floor(intersection.x),
+                y: intersection.y - 1,
+            };
         }
+
+        const tileType = this.mapData[tile.y][tile.x];
+        return { tile, tileType };
     }
 
-    private getVerticalCollisionTileType(intersection: ICoords, rayXDir: number): number {
+    private getVerticalCollisionTile(intersection: ICoords, rayXDir: number): ITile {
+        let tile: ICoords;
+
         if (rayXDir === 1) {
-            return this.mapData[Math.floor(intersection.y)][intersection.x];
+            tile = {
+                x: intersection.x,
+                y: Math.floor(intersection.y),
+            };
         } else {
-            return this.mapData[Math.floor(intersection.y)][intersection.x - 1];
+            tile = {
+                x: intersection.x - 1,
+                y: Math.floor(intersection.y),
+            };
         }
+
+        const tileType = this.mapData[tile.y][tile.x];
+        return { tile, tileType };
     }
 
     private getRayLength(collision: ICoords, rayAngle: number): number {

@@ -1,3 +1,13 @@
+
+// The reason for this require/export hack
+// is to tell webpack to use these assets
+// but avoid adding them statically to the build.
+// tslint:disable:no-var-requires
+export const texture1 = require("./images/tile07.jpg") as string;
+// export const texture1 = require("./images/background-brick-bricks-220182.jpg") as string;
+export const texture2 = require("./images/tile13.jpg") as string;
+// export const texture2 = require("./images/background-brown-carpentry-326311.jpg") as string;
+
 // 32x24 blocks
 export const levelMap = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

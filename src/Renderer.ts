@@ -1,4 +1,4 @@
-import { IRayData, ISettings } from "./interfaces";
+import { IEngineOptions, IPixel, IRayData } from "./interfaces";
 import ProjectionScreen from "./ProjectionScreen";
 import { getSettings } from "./settings";
 import Texture from "./Texture";
@@ -8,10 +8,11 @@ export default class Renderer {
     private ctx: CanvasRenderingContext2D;
     private screenWidth = 320;
     private screenHeight = 200;
-    private rayHSpace: number;
+    private verticalCenter: number;
+    // private rayHSpace: number;
     // private readonly planeDistance = 4.328125;
     private readonly planeDistance = 1.5;  // why 1.5? (found this out by surprise)
-    private readonly settings: ISettings;
+    private readonly settings: IEngineOptions;
     private textures: Texture[] = [];
 
     constructor(screen: ProjectionScreen) {
@@ -20,15 +21,17 @@ export default class Renderer {
 
         this.screenWidth = this.ctx.canvas.width;
         this.screenHeight = this.ctx.canvas.height;
+        this.verticalCenter = Math.floor(this.screenHeight * 0.5);
 
-        this.rayHSpace = Math.floor(this.screenWidth / this.settings.fov);
+        // this.rayHSpace = Math.floor(this.screenWidth / this.settings.fov);
     }
 
     public render(rays: IRayData[]) {
         // this.ctx.lineWidth = 10;
         this.clearGameCanvas();
         this.drawBackground();
-        this.drawLines(rays);
+        // this.drawVerticalLines(rays);
+        this.drawTexturedWalls(rays);
     }
 
     public drawBackground() {
@@ -36,7 +39,7 @@ export default class Renderer {
         let lineNum = 0;
 
         for (; lineNum < this.screenHeight / 2; lineNum++) {
-            const color = `rgb(120, 120, ${c})`;
+            const color = `rgb(120, 100, ${c})`;
             this.drawHorizontalLine(lineNum, color);
             c--;
         }
@@ -68,7 +71,7 @@ export default class Renderer {
         return this.textures[tileType - 1];
     }
 
-    private drawLines(rays: IRayData[]) {
+    private drawVerticalLines(rays: IRayData[]) {
         let nextRayAt = 1;
         let ray: IRayData;
 
@@ -76,22 +79,22 @@ export default class Renderer {
             // let green = this.addDistanceShadow(ray.rayLength);
             let green = 220;
 
-            if (ray.type === "h") {
+            if (ray.collisionType === "h") {
                 green -= 30;
             }
             this.ctx.strokeStyle = `rgb(0, ${green}, 0)`;
 
-            this.drawLine(ray.rayLength, nextRayAt);
+            this.drawVerticalLine(ray.rayLength, nextRayAt);
             // nextRayAt += this.rayHSpace;
             nextRayAt += 1;
         }
     }
 
-    private drawLine(rayLength: number, horizontalPosition: number) {
-        const verticalCenter = this.screenHeight / 2;
+    private drawVerticalLine(rayLength: number, horizontalPosition: number) {
         const lineHeight = (this.planeDistance / rayLength) * this.screenHeight;
-        const startingPoint = verticalCenter - (lineHeight / 2);
-        const endPoint = verticalCenter + (lineHeight / 2);
+        const halfHeight = lineHeight * 0.5;
+        const startingPoint = this.verticalCenter - halfHeight;
+        const endPoint = this.verticalCenter + halfHeight;
 
         this.ctx.beginPath();
         this.ctx.moveTo(
@@ -104,6 +107,71 @@ export default class Renderer {
         );
         this.ctx.closePath();
         this.ctx.stroke();
+    }
+
+    private drawTexturedWalls(rays: IRayData[]) {
+        let ray: IRayData;
+        let screenColumn = 1;
+
+        for (ray of rays) {
+            this.drawTexturedVerticalLine(ray, screenColumn);
+            screenColumn++;
+        }
+    }
+
+    private drawTexturedVerticalLine(ray: IRayData, column: number) {
+        const texture = this.textures[ray.tileType - 1];
+        let image: HTMLImageElement;
+
+        // this works but promises would be more elegant
+        if (texture.width !== 0) {
+
+            const lineHeight = (this.planeDistance / ray.rayLength) * this.screenHeight;
+            const halfHeight = lineHeight * 0.5;
+            const startingPoint = this.verticalCenter - halfHeight;
+            // const endPoint = this.verticalCenter + halfHeight;
+
+            let tileOffset: number;
+
+            if (ray.collisionType === "h") {
+                tileOffset = ray.collision.x - ray.tile.x;
+                image = texture.image;
+            } else {
+                tileOffset = ray.collision.y - ray.tile.y;
+                image = texture.imageDark;
+            }
+
+            const row = Math.floor(tileOffset / texture.singleXOffset);
+
+            this.ctx.drawImage(
+                image,
+                row, 0,
+                1, texture.height,
+                column, startingPoint,
+                1, lineHeight,
+            );
+        }
+    }
+
+    private drawVerticalTexturedShadedLine(ray: IRayData, horizontalPosition: number) {
+        const lineHeight = (this.planeDistance / ray.rayLength) * this.screenHeight;
+        const halfHeight = lineHeight * 0.5;
+        const startingPoint = this.verticalCenter - halfHeight;
+        const endPoint = this.verticalCenter + halfHeight;
+
+        const texture = this.textures[ray.tileType];
+        let tileOffset: number;
+
+        if (ray.collisionType === "h") {
+            tileOffset = ray.collision.x - ray.tile.x;
+        } else {
+            tileOffset = ray.collision.y - ray.tile.y;
+
+        }
+        const row = Math.floor(tileOffset / texture.singleXOffset);
+        const line = 0;
+        const pixel: IPixel = texture.getPixel(row, line);
+
     }
 
     private clearGameCanvas() {

@@ -1,11 +1,11 @@
-import { ICanvasSize, ICanvasStack, ISettings } from "./interfaces";
+import { ICanvasSize, ICanvasStack, IEngineOptions } from "./interfaces";
 import { getSettings } from "./settings";
 
 export default class ProjectionScreen {
 
     private container: HTMLElement;
     private canvasStack: ICanvasStack;
-    private settings: ISettings;
+    private settings: IEngineOptions;
 
     constructor(containerName: string, canvasSize?: ICanvasSize) {
 
@@ -13,8 +13,8 @@ export default class ProjectionScreen {
         this.settings = getSettings();
 
         if (canvasSize) {
-            this.settings.screen.width = canvasSize.width;
-            this.settings.screen.height = canvasSize.height;
+            this.settings.canvasSize.width = canvasSize.width;
+            this.settings.canvasSize.height = canvasSize.height;
         }
 
         if (container !== null && container.tagName === "DIV") {
@@ -56,8 +56,8 @@ export default class ProjectionScreen {
     }
 
     private setContainerProperties() {
-        this.container.style.width = this.settings.screen.width + "px";
-        this.container.style.height = this.settings.screen.height + "px";
+        this.container.style.width = this.settings.canvasSize.width + "px";
+        this.container.style.height = this.settings.canvasSize.height + "px";
         this.container.style.border = "2px solid black";
         this.setBackgroundColor("lightgray");
     }
@@ -93,8 +93,8 @@ export default class ProjectionScreen {
     }
 
     private setCanvasProperties(canvas: HTMLCanvasElement) {
-        canvas.width = this.settings.screen.width;
-        canvas.height = this.settings.screen.height;
+        canvas.width = this.settings.canvasSize.width;
+        canvas.height = this.settings.canvasSize.height;
         canvas.style.backgroundColor = "transparent";
 
         canvas.style.position = "absolute";

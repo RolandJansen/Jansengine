@@ -9,11 +9,12 @@
     </body>
 
     <script>
+
         function init() {
             const game = jansengine.getInstance("demo");
             game.loadMap(demo.levelMap);
-            game.addTexture("./images/tile07.jpg", 1);
-            game.addTexture("./images/tile13.jpg", 2);
+            game.addTexture(demo.texture1, 1)
+                .addTexture(demo.texture2, 2);
             game.gameCycle();
         }
     </script>

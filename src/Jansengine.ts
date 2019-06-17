@@ -1,4 +1,4 @@
-import { IEngineOptions, ISettings } from "./interfaces";
+import { IEngineOptions } from "./interfaces";
 import KeyBindings from "./KeyBindings";
 import MiniMap from "./MiniMap";
 import Player from "./Player";
@@ -19,7 +19,7 @@ import Texture from "./Texture";
  */
 export default class Jansengine {
 
-    private settings: ISettings;
+    private settings: IEngineOptions;
     private screen!: ProjectionScreen;
     private map!: MiniMap;
     private player!: Player;
