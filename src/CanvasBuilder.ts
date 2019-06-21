@@ -1,7 +1,7 @@
 import { ICanvasSize, ICanvasStack, IEngineOptions } from "./interfaces";
 import { getSettings } from "./settings";
 
-export default class ProjectionScreen {
+export default class CanvasBuilder {
 
     private container: HTMLElement;
     private canvasStack: ICanvasStack;

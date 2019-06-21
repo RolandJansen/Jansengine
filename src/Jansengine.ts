@@ -1,8 +1,10 @@
+import CanvasBuilder from "./CanvasBuilder";
 import { IEngineOptions } from "./interfaces";
+import IProjectionPlane from "./IProjectionPlane";
 import KeyBindings from "./KeyBindings";
 import MiniMap from "./MiniMap";
 import Player from "./Player";
-import ProjectionScreen from "./ProjectionScreen";
+import getProjectionPlaneInstance from "./ProjectionPlane";
 import Raycaster from "./Raycaster";
 import Renderer from "./Renderer";
 import { getSettings } from "./settings";
@@ -20,11 +22,12 @@ import Texture from "./Texture";
 export default class Jansengine {
 
     private settings: IEngineOptions;
-    private screen!: ProjectionScreen;
+    private screen!: CanvasBuilder;
     private map!: MiniMap;
     private player!: Player;
     private keyBindings!: KeyBindings;
     private rayCaster!: Raycaster;
+    private projectionPlane: IProjectionPlane;
     private renderer: Renderer;
 
     constructor(containerName: string, engineOptions?: IEngineOptions) {
@@ -32,16 +35,16 @@ export default class Jansengine {
 
         if (engineOptions) {
             if (engineOptions.canvasSize) {
-                this.screen = new ProjectionScreen(containerName, engineOptions.canvasSize);
+                this.screen = new CanvasBuilder(containerName, engineOptions.canvasSize);
             }
             if (engineOptions.map) {
                 this.loadMap(engineOptions.map);
             }
         } else {
-            this.screen = new ProjectionScreen(containerName);
+            this.screen = new CanvasBuilder(containerName);
         }
-
-        this.renderer = new Renderer(this.screen);
+        this.projectionPlane = getProjectionPlaneInstance(this.settings);
+        this.renderer = new Renderer(this.screen.getGameContext(), this.projectionPlane);
     }
 
     public gameCycle() {
@@ -62,7 +65,7 @@ export default class Jansengine {
         this.map = new MiniMap(mapData, this.screen);
         this.player = new Player(mapData);
         this.keyBindings = new KeyBindings(this.player);
-        this.rayCaster = new Raycaster(mapData, 1, this.player.playerPosition);
+        this.rayCaster = new Raycaster(mapData, this.player.playerPosition, this.projectionPlane);
     }
 
     public addTexture(imageName: string, tileType?: number): this {

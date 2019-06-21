@@ -1,6 +1,6 @@
+import CanvasBuilder from "./CanvasBuilder";
 import { ICoords, ILookupTables, IRayData } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
-import ProjectionScreen from "./ProjectionScreen";
 
 export default class MiniMap {
 
@@ -15,7 +15,7 @@ export default class MiniMap {
     private mapHeight: number;
     private tables: ILookupTables;
 
-    constructor(private mapData: number[][], screen: ProjectionScreen) {
+    constructor(private mapData: number[][], screen: CanvasBuilder) {
         this.tables = getLookupTables();
         this.mapCtx = screen.getMiniMapContext();
         this.playerCtx = screen.getMiniPlayerContext();
@@ -88,7 +88,7 @@ export default class MiniMap {
         this.playerCtx.lineTo(
             (playerPosition.x + this.tables.cos[playerDirection] * this.playerEdgeLength) * this.miniMapBlockWidth,
             (playerPosition.y - this.tables.sin[playerDirection] * this.playerEdgeLength) * this.miniMapBlockWidth,
-        )
+        );
         this.playerCtx.closePath();
         this.playerCtx.stroke();
     }

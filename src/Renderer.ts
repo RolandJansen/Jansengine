@@ -1,27 +1,18 @@
 import { IEngineOptions, IPixel, IRayData } from "./interfaces";
-import ProjectionScreen from "./ProjectionScreen";
+import IProjectionPlane from "./IProjectionPlane";
 import { getSettings } from "./settings";
 import Texture from "./Texture";
 
 export default class Renderer {
 
-    private ctx: CanvasRenderingContext2D;
-    private screenWidth = 320;
-    private screenHeight = 200;
-    private verticalCenter: number;
     // private rayHSpace: number;
     // private readonly planeDistance = 4.328125;
     private readonly planeDistance = 1.5;  // why 1.5? (found this out by surprise)
     private readonly settings: IEngineOptions;
     private textures: Texture[] = [];
 
-    constructor(screen: ProjectionScreen) {
-        this.ctx = screen.getGameContext();
+    constructor(private ctx: CanvasRenderingContext2D, private plane: IProjectionPlane) {
         this.settings = getSettings();
-
-        this.screenWidth = this.ctx.canvas.width;
-        this.screenHeight = this.ctx.canvas.height;
-        this.verticalCenter = Math.floor(this.screenHeight * 0.5);
 
         // this.rayHSpace = Math.floor(this.screenWidth / this.settings.fov);
     }
@@ -38,7 +29,7 @@ export default class Renderer {
         let c = 255;
         let lineNum = 0;
 
-        for (; lineNum < this.screenHeight / 2; lineNum++) {
+        for (; lineNum < this.plane.height / 2; lineNum++) {
             const color = `rgb(120, 100, ${c})`;
             this.drawHorizontalLine(lineNum, color);
             c--;
@@ -46,7 +37,7 @@ export default class Renderer {
 
         let scanline = false;
         c = 0;
-        for (; lineNum < this.screenHeight; lineNum++) {
+        for (; lineNum < this.plane.height; lineNum++) {
             const color = `rgb(${c}, ${c}, ${c})`;
             // const color = `rgb(${c}, 20, 20)`;
             this.drawHorizontalLine(lineNum, color);
@@ -91,10 +82,10 @@ export default class Renderer {
     }
 
     private drawVerticalLine(rayLength: number, horizontalPosition: number) {
-        const lineHeight = (this.planeDistance / rayLength) * this.screenHeight;
+        const lineHeight = (this.planeDistance / rayLength) * this.plane.height;
         const halfHeight = lineHeight * 0.5;
-        const startingPoint = this.verticalCenter - halfHeight;
-        const endPoint = this.verticalCenter + halfHeight;
+        const startingPoint = this.plane.verticalCenter - halfHeight;
+        const endPoint = this.plane.verticalCenter + halfHeight;
 
         this.ctx.beginPath();
         this.ctx.moveTo(
@@ -126,9 +117,9 @@ export default class Renderer {
         // this works but promises would be more elegant
         if (texture.width !== 0) {
 
-            const lineHeight = (this.planeDistance / ray.rayLength) * this.screenHeight;
+            const lineHeight = (this.planeDistance / ray.rayLength) * this.plane.height;
             const halfHeight = lineHeight * 0.5;
-            const startingPoint = this.verticalCenter - halfHeight;
+            const startingPoint = this.plane.verticalCenter - halfHeight;
             // const endPoint = this.verticalCenter + halfHeight;
 
             let tileOffset: number;
@@ -154,10 +145,10 @@ export default class Renderer {
     }
 
     private drawVerticalTexturedShadedLine(ray: IRayData, horizontalPosition: number) {
-        const lineHeight = (this.planeDistance / ray.rayLength) * this.screenHeight;
+        const lineHeight = (this.planeDistance / ray.rayLength) * this.plane.height;
         const halfHeight = lineHeight * 0.5;
-        const startingPoint = this.verticalCenter - halfHeight;
-        const endPoint = this.verticalCenter + halfHeight;
+        const startingPoint = this.plane.verticalCenter - halfHeight;
+        const endPoint = this.plane.verticalCenter + halfHeight;
 
         const texture = this.textures[ray.tileType];
         let tileOffset: number;
@@ -175,7 +166,7 @@ export default class Renderer {
     }
 
     private clearGameCanvas() {
-        this.ctx.clearRect(0, 0, this.screenWidth, this.screenHeight);
+        this.ctx.clearRect(0, 0, this.plane.width, this.plane.height);
     }
 
     // copied from F. Permadi tutorial
@@ -197,7 +188,7 @@ export default class Renderer {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
         this.ctx.moveTo(0, height);
-        this.ctx.lineTo(this.screenWidth, height);
+        this.ctx.lineTo(this.plane.width, height);
         this.ctx.closePath();
         this.ctx.stroke();
     }

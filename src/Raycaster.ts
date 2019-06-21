@@ -1,4 +1,5 @@
 import { ICollision, ICoords, IEngineOptions, ILookupTables, IRadiants, IRayData, ITile } from "./interfaces";
+import IProjectionPlane from "./IProjectionPlane";
 import { getLookupTables } from "./lookupTables";
 import { getAngles, getSettings } from "./settings";
 
@@ -11,8 +12,8 @@ export default class Raycaster {
 
     constructor(
         private readonly mapData: number[][],
-        private readonly tileSize: number,
-        private playerPosition: ICoords) {
+        private playerPosition: ICoords,
+        private plane: IProjectionPlane) {
 
             this.settings = getSettings();
             this.a = getAngles();
@@ -149,7 +150,7 @@ export default class Raycaster {
             y: yIntersection,
         };
 
-        // check for collision and do the same fora ll other horizontal intersections
+        // check for collision and do the same for all other horizontal intersections
         while (intersection.y > 0 &&
             intersection.y < this.mapHeight &&
             intersection.x > 0 &&
@@ -207,6 +208,23 @@ export default class Raycaster {
 
         const tileType = this.mapData[tile.y][tile.x];
         return { tile, tileType };
+    }
+
+    private getHorizontalFloorTile(collisionTile: ICoords, rayYDir: number): ICoords {
+        let tile: ICoords;
+
+        if (rayYDir === 1) {
+            tile = {
+                x: collisionTile.x,
+                y: collisionTile.y - 1,
+            };
+        } else {
+            tile = {
+                x: collisionTile.x,
+                y: collisionTile.y + 1,
+            };
+        }
+        return tile;
     }
 
     private getVerticalCollisionTile(intersection: ICoords, rayXDir: number): ITile {

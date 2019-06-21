@@ -1,4 +1,4 @@
-import Player from './Player'
+import Player from "./Player";
 
 export default class KeyBindings {
 
@@ -6,7 +6,7 @@ export default class KeyBindings {
         document.addEventListener("keydown", (e: KeyboardEvent) => {
             this.processKeyDown(e);
         });
-        document.addEventListener("keyup", (e:KeyboardEvent) => {
+        document.addEventListener("keyup", (e: KeyboardEvent) => {
             this.processKeyUp(e);
         });
     }
