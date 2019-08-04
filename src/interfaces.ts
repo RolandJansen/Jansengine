@@ -1,8 +1,10 @@
+export type IMapData = number[][];
+
 export interface IEngineOptions {
     pov: number;
     fov: number;
     canvasSize: ICanvasSize;
-    map?: number[][];
+    map?: IMapData;
 }
 
 export interface ICoords {
@@ -24,6 +26,13 @@ export interface IRayData extends ICollision {
     collisionType: string;  // "v" for vertical-, "h" for horizontal-collision
 }
 
+export interface IWallProjection {
+    height: number;
+    halfHeight: number;
+    startPixel: number;
+    endPixel: number;
+}
+
 export interface ICanvasStack {
     [canvasName: string]: HTMLCanvasElement;
 }
@@ -31,6 +40,14 @@ export interface ICanvasStack {
 export interface ICanvasSize {
     width: number;
     height: number;
+}
+
+export interface IProjectionPlane {
+    width: number;
+    height: number;
+    verticalCenter: number;
+    horizontalCenter: number;
+    distanceToPlayer: number;
 }
 
 export interface ILookupTables {

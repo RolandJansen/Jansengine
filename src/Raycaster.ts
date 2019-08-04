@@ -1,5 +1,14 @@
-import { ICollision, ICoords, IEngineOptions, ILookupTables, IRadiants, IRayData, ITile } from "./interfaces";
-import IProjectionPlane from "./IProjectionPlane";
+import {
+    ICollision,
+    ICoords,
+    IEngineOptions,
+    ILookupTables,
+    IMapData,
+    IProjectionPlane,
+    IRadiants,
+    IRayData,
+    ITile,
+    IWallProjection} from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import { getAngles, getSettings } from "./settings";
 
@@ -9,10 +18,13 @@ export default class Raycaster {
     private readonly settings: IEngineOptions;
     private readonly a: IRadiants;
     private readonly tables: ILookupTables;
+    private playerPosition: ICoords = {
+        x: 0,
+        y: 0,
+    } ;
 
     constructor(
-        private readonly mapData: number[][],
-        private playerPosition: ICoords,
+        private readonly mapData: IMapData,
         private plane: IProjectionPlane) {
 
             this.settings = getSettings();
@@ -23,29 +35,27 @@ export default class Raycaster {
             // this.rayData = { rayLengths: [], collisions: [] };
     }
 
-    public castRays(playerPosition: ICoords, direction: number): IRayData[] {
+    // public castRays(playerPosition: ICoords, direction: number): IRayData[] {
 
-        const rays: IRayData[] = [];
-        let rayAngle = direction - this.a.angle30;
+    //     const rays: IRayData[] = [];
+    //     let rayAngle = direction - this.a.angle30;
 
+    //     this.playerPosition = playerPosition;
+
+    //     for (let i = 0; i < this.settings.canvasSize.width; i++) {
+    //         const ray = this.castRayAt(rayAngle);
+
+    //         ray.rayLength = this.tables.fishbowl[i] * ray.rayLength;
+
+    //         rays[i] = ray;
+    //         rayAngle += 1;
+    //     }
+
+    //     return rays;
+    // }
+
+    public castRay(rayAngle: number, playerPosition: ICoords): IRayData {
         this.playerPosition = playerPosition;
-
-        for (let i = 0; i < this.settings.canvasSize.width; i++) {
-            // we commit the rayData object to the castRayAt method
-            // so the arrays can be populated. Normally this is not a
-            // good approach but we do it here for the sake of performance.
-            const ray = this.castRayAt(rayAngle);
-
-            ray.rayLength = this.tables.fishbowl[i] * ray.rayLength;
-
-            rays[i] = ray;
-            rayAngle += 1;
-        }
-
-        return rays;
-    }
-
-    private castRayAt(rayAngle: number): IRayData {
 
         // make shure we're between 0° and 359°
         if (rayAngle < 0) {
@@ -261,6 +271,20 @@ export default class Raycaster {
         }
 
         return rayLength;
+    }
+
+    private getWallProjectionData(rayData: IRayData): IWallProjection {
+        const height = (this.plane.distanceToPlayer / rayData.rayLength) * this.plane.height;
+        const halfHeight = Math.floor(height * 0.5);
+        const startPixel = this.plane.verticalCenter - halfHeight;
+        const endPixel = this.plane.verticalCenter + halfHeight;
+
+        return {
+            height,
+            halfHeight,
+            startPixel,
+            endPixel,
+        };
     }
 
 }

@@ -1,7 +1,7 @@
-import { ICanvasSize, ICanvasStack, IEngineOptions } from "./interfaces";
+import { ICanvasSize, ICanvasStack, IEngineOptions, IProjectionPlane } from "./interfaces";
 import { getSettings } from "./settings";
 
-export default class CanvasBuilder {
+export default class CanvasStack {
 
     private container: HTMLElement;
     private canvasStack: ICanvasStack;
@@ -49,6 +49,16 @@ export default class CanvasBuilder {
 
     public getMiniPlayerContext(): CanvasRenderingContext2D {
         return this.canvasStack.miniPlayer.getContext("2d")!;
+    }
+
+    public getProjectionPlane(): IProjectionPlane {
+        return {
+            width: this.settings.canvasSize.width,
+            height: this.settings.canvasSize.height,
+            horizontalCenter: Math.floor(this.settings.canvasSize.width * 0.5),
+            verticalCenter: Math.floor(this.settings.canvasSize.height * 0.5),
+            distanceToPlayer: 1.5, // why 1.5? (found this by surprise)
+        };
     }
 
     public setFocusOnGame() {

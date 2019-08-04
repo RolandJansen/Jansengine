@@ -1,4 +1,4 @@
-import CanvasBuilder from "./CanvasBuilder";
+import CanvasBuilder from "./CanvasStack";
 import { ICoords, ILookupTables, IRayData } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 

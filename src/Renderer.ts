@@ -1,5 +1,4 @@
-import { IEngineOptions, IPixel, IRayData } from "./interfaces";
-import IProjectionPlane from "./IProjectionPlane";
+import { IEngineOptions, IPixel, IProjectionPlane, IRayData } from "./interfaces";
 import { getSettings } from "./settings";
 import Texture from "./Texture";
 
@@ -17,38 +16,16 @@ export default class Renderer {
         // this.rayHSpace = Math.floor(this.screenWidth / this.settings.fov);
     }
 
-    public render(rays: IRayData[]) {
+    public buildFrame() {
         // this.ctx.lineWidth = 10;
         this.clearGameCanvas();
         this.drawBackground();
-        // this.drawVerticalLines(rays);
-        this.drawTexturedWalls(rays);
+        // this.drawVerticalLine(ray, screenColumn);
+        // this.drawTexturedWalls(rays);
+
+        // this.drawTexturedVerticalLine(ray, screenColumn);
     }
 
-    public drawBackground() {
-        let c = 255;
-        let lineNum = 0;
-
-        for (; lineNum < this.plane.height / 2; lineNum++) {
-            const color = `rgb(120, 100, ${c})`;
-            this.drawHorizontalLine(lineNum, color);
-            c--;
-        }
-
-        let scanline = false;
-        c = 0;
-        for (; lineNum < this.plane.height; lineNum++) {
-            const color = `rgb(${c}, ${c}, ${c})`;
-            // const color = `rgb(${c}, 20, 20)`;
-            this.drawHorizontalLine(lineNum, color);
-            if (scanline) {
-                c++;
-                scanline = false;
-            } else {
-                scanline = true;
-            }
-        }
-    }
 
     public addTexture(texture: Texture, tileType?: number) {
         if (tileType) {
@@ -62,30 +39,36 @@ export default class Renderer {
         return this.textures[tileType - 1];
     }
 
-    private drawVerticalLines(rays: IRayData[]) {
-        let nextRayAt = 1;
-        let ray: IRayData;
+    // private drawVerticalLines(rays: IRayData[]) {
+    //     let nextRayAt = 1;
+    //     let ray: IRayData;
 
-        for (ray of rays) {
-            // let green = this.addDistanceShadow(ray.rayLength);
-            let green = 220;
+    //     for (ray of rays) {
+    //         // let green = this.addDistanceShadow(ray.rayLength);
+    //         let green = 220;
 
-            if (ray.collisionType === "h") {
-                green -= 30;
-            }
-            this.ctx.strokeStyle = `rgb(0, ${green}, 0)`;
+    //         if (ray.collisionType === "h") {
+    //             green -= 30;
+    //         }
+    //         this.ctx.strokeStyle = `rgb(0, ${green}, 0)`;
 
-            this.drawVerticalLine(ray.rayLength, nextRayAt);
-            // nextRayAt += this.rayHSpace;
-            nextRayAt += 1;
-        }
-    }
+    //         this.drawVerticalLine(ray.rayLength, nextRayAt);
+    //         // nextRayAt += this.rayHSpace;
+    //         nextRayAt += 1;
+    //     }
+    // }
 
-    private drawVerticalLine(rayLength: number, horizontalPosition: number) {
-        const lineHeight = (this.planeDistance / rayLength) * this.plane.height;
+    public drawVerticalLine(ray: IRayData, horizontalPosition: number) {
+        const lineHeight = (this.planeDistance / ray.rayLength) * this.plane.height;
         const halfHeight = lineHeight * 0.5;
         const startingPoint = this.plane.verticalCenter - halfHeight;
         const endPoint = this.plane.verticalCenter + halfHeight;
+
+        let green = 220;
+        if (ray.collisionType === "h") {
+            green -= 30;
+        }
+        this.ctx.strokeStyle = `rgb(0, ${green}, 0)`;
 
         this.ctx.beginPath();
         this.ctx.moveTo(
@@ -100,18 +83,21 @@ export default class Renderer {
         this.ctx.stroke();
     }
 
-    private drawTexturedWalls(rays: IRayData[]) {
-        let ray: IRayData;
-        let screenColumn = 1;
+    // private drawTexturedWalls(rays: IRayData[]) {
+    //     let ray: IRayData;
+    //     let screenColumn = 1;
 
-        for (ray of rays) {
-            this.drawTexturedVerticalLine(ray, screenColumn);
-            screenColumn++;
-        }
-    }
+    //     for (ray of rays) {
+    //         this.drawTexturedVerticalLine(ray, screenColumn);
+    //         screenColumn++;
+    //     }
+    // }
 
-    private drawTexturedVerticalLine(ray: IRayData, column: number) {
-        const texture = this.textures[ray.tileType - 1];
+    public drawTexturedVerticalLine(ray: IRayData, column: number) {
+        const texture = this.getTexture(ray.tileType);
+        // console.log(texture);
+        // console.log(ray.tileType);
+        // console.log(texture.width);
         let image: HTMLImageElement;
 
         // this works but promises would be more elegant
@@ -167,6 +153,31 @@ export default class Renderer {
 
     private clearGameCanvas() {
         this.ctx.clearRect(0, 0, this.plane.width, this.plane.height);
+    }
+
+    private drawBackground() {
+        let c = 255;
+        let lineNum = 0;
+
+        for (; lineNum < this.plane.height / 2; lineNum++) {
+            const color = `rgb(120, 100, ${c})`;
+            this.drawHorizontalLine(lineNum, color);
+            c--;
+        }
+
+        let scanline = false;
+        c = 0;
+        for (; lineNum < this.plane.height; lineNum++) {
+            const color = `rgb(${c}, ${c}, ${c})`;
+            // const color = `rgb(${c}, 20, 20)`;
+            this.drawHorizontalLine(lineNum, color);
+            if (scanline) {
+                c++;
+                scanline = false;
+            } else {
+                scanline = true;
+            }
+        }
     }
 
     // copied from F. Permadi tutorial
