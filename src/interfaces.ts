@@ -26,12 +26,12 @@ export interface IRayData extends ICollision {
     collisionType: string;  // "v" for vertical-, "h" for horizontal-collision
 }
 
-export interface IWallProjection {
-    height: number;
-    halfHeight: number;
-    startPixel: number;
-    endPixel: number;
-}
+// export interface IWallProjection {
+//     height: number;
+//     halfHeight: number;
+//     startPixel: number;
+//     endPixel: number;
+// }
 
 export interface ICanvasStack {
     [canvasName: string]: HTMLCanvasElement;
@@ -63,4 +63,9 @@ export interface IPixel {
     g: number;
     b: number;
     a: number;
+}
+
+export interface IWallSlice {
+    start: number;
+    end: number;
 }

@@ -7,8 +7,7 @@ import {
     IProjectionPlane,
     IRadiants,
     IRayData,
-    ITile,
-    IWallProjection} from "./interfaces";
+    ITile} from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import { getAngles, getSettings } from "./settings";
 
@@ -273,18 +272,18 @@ export default class Raycaster {
         return rayLength;
     }
 
-    private getWallProjectionData(rayData: IRayData): IWallProjection {
-        const height = (this.plane.distanceToPlayer / rayData.rayLength) * this.plane.height;
-        const halfHeight = Math.floor(height * 0.5);
-        const startPixel = this.plane.verticalCenter - halfHeight;
-        const endPixel = this.plane.verticalCenter + halfHeight;
+    // private getWallProjectionData(rayData: IRayData): IWallProjection {
+    //     const height = (this.plane.distanceToPlayer / rayData.rayLength) * this.plane.height;
+    //     const halfHeight = Math.floor(height * 0.5);
+    //     const startPixel = this.plane.verticalCenter - halfHeight;
+    //     const endPixel = this.plane.verticalCenter + halfHeight;
 
-        return {
-            height,
-            halfHeight,
-            startPixel,
-            endPixel,
-        };
-    }
+    //     return {
+    //         height,
+    //         halfHeight,
+    //         startPixel,
+    //         endPixel,
+    //     };
+    // }
 
 }

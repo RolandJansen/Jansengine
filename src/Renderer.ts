@@ -1,4 +1,4 @@
-import { IEngineOptions, IPixel, IProjectionPlane, IRayData } from "./interfaces";
+import { IEngineOptions, IPixel, IProjectionPlane, IRayData, IWallSlice } from "./interfaces";
 import { getSettings } from "./settings";
 import Texture from "./Texture";
 
@@ -8,9 +8,10 @@ export default class Renderer {
     // private readonly planeDistance = 4.328125;
     private readonly planeDistance = 1.5;  // why 1.5? (found this out by surprise)
     private readonly settings: IEngineOptions;
-    private textures: Texture[] = [];
 
-    constructor(private ctx: CanvasRenderingContext2D, private plane: IProjectionPlane) {
+    constructor(private readonly ctx: CanvasRenderingContext2D,
+                private readonly plane: IProjectionPlane,
+                private readonly textures: Texture[]) {
         this.settings = getSettings();
 
         // this.rayHSpace = Math.floor(this.screenWidth / this.settings.fov);
@@ -24,15 +25,6 @@ export default class Renderer {
         // this.drawTexturedWalls(rays);
 
         // this.drawTexturedVerticalLine(ray, screenColumn);
-    }
-
-
-    public addTexture(texture: Texture, tileType?: number) {
-        if (tileType) {
-            this.textures[tileType - 1] = texture;
-        } else {
-            this.textures.push(texture);
-        }
     }
 
     public getTexture(tileType: number): Texture {
@@ -58,26 +50,18 @@ export default class Renderer {
     //     }
     // }
 
-    public drawVerticalLine(ray: IRayData, horizontalPosition: number) {
-        const lineHeight = (this.planeDistance / ray.rayLength) * this.plane.height;
-        const halfHeight = lineHeight * 0.5;
-        const startingPoint = this.plane.verticalCenter - halfHeight;
-        const endPoint = this.plane.verticalCenter + halfHeight;
+    public drawWallSlice(wallSlice: IWallSlice, horizontalPosition: number, color: string) {
 
-        let green = 220;
-        if (ray.collisionType === "h") {
-            green -= 30;
-        }
-        this.ctx.strokeStyle = `rgb(0, ${green}, 0)`;
+        this.ctx.strokeStyle = color;
 
         this.ctx.beginPath();
         this.ctx.moveTo(
             horizontalPosition,
-            startingPoint,
+            wallSlice.start,
         );
         this.ctx.lineTo(
             horizontalPosition,
-            endPoint,
+            wallSlice.end,
         );
         this.ctx.closePath();
         this.ctx.stroke();
@@ -93,7 +77,12 @@ export default class Renderer {
     //     }
     // }
 
-    public drawTexturedVerticalLine(ray: IRayData, column: number) {
+    /**
+     * @todo The whole calculation-thing was already done in the controller. Simplify this!
+     * @param ray
+     * @param column
+     */
+    public drawTexturedWallSlice(ray: IRayData, column: number) {
         const texture = this.getTexture(ray.tileType);
         // console.log(texture);
         // console.log(ray.tileType);

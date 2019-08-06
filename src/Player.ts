@@ -8,6 +8,7 @@ export default class Player {
         x: 16,
         y: 10,
     };
+    public playerHeight = 0.2;  // 1=screenheight (if 1~320px -> 0.2~64px)
     public direction = 0;  // north=90°, south=270°, etc
     public movementSpeed = 0.18;
     public rotateLeftRight = 0;  // left = 1, right = -1 (degree)
