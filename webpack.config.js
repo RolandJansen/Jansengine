@@ -10,6 +10,7 @@ module.exports = {
         demo: './src/demo/demo.ts'
     },
     output: {
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',  // for vs debugger
         path: path.resolve(__dirname, './dist'),
         filename: '[name].js',
         library: '[name]',
@@ -32,7 +33,7 @@ module.exports = {
             }
         ]
     },
-    devtool: 'eval-source-map',
+    devtool: 'cheap-module-source-map',  // eval based sm doesn't work with vs debugger
     plugins: [
         new DtsBundleWebpack({
             // see dts-bundle-webpack npm page for options

@@ -7,7 +7,7 @@
     "build": "webpack",
     "compile": "tsc",
     "test": "jest --watch",
-    "watch": "webpack-dev-server --open"
+    "watch": "webpack-dev-server"
   },
   "repository": {
     "type": "git",
