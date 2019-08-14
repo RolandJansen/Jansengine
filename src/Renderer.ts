@@ -153,23 +153,6 @@ export default class Renderer {
         return this.textures[tileType - 1];
     }
 
-    public drawTexturedFloorSlice(pixels: IPixel[], wall: IWallSliceData, column: number) {
-        const floorHeight = pixels.length;
-        const bytesPerRow = this.gameCtx.canvas.width * 4;
-        const xByteOffset = column * 4;
-        let byteOffset = (bytesPerRow * wall.start) + xByteOffset;
-
-        for (let i = wall.end + 1; i <= this.plane.height; i++) {
-            pixels.forEach((pixel) => {
-                this.pixelBuffer.data[byteOffset] = pixel.r;
-                this.pixelBuffer.data[byteOffset + 1] = pixel.g;
-                this.pixelBuffer.data[byteOffset + 2] = pixel.b;
-                this.pixelBuffer.data[byteOffset + 3] = pixel.a;
-            });
-            byteOffset += bytesPerRow;
-        }
-    }
-
     private drawVerticalTexturedShadedLine(ray: IRayData, horizontalPosition: number) {
         const lineHeight = (this.plane.distanceToPlayer / ray.rayLength) * this.plane.height;
         const halfHeight = lineHeight * 0.5;

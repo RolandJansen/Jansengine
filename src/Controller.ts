@@ -43,6 +43,7 @@ export default class Controller {
 
     public castAndRender() {
         let columnAngle = this.player.direction - this.a.angle30;
+        console.log(this.player.playerPosition);
 
         this.renderer.clearBufferCanvas();
         this.renderer.clearGameCanvas();
@@ -58,18 +59,18 @@ export default class Controller {
 
             const wallSlice = this.getWallSlice(ray);
 
-            const floorPixels = this.floorCaster.castFloorColumn(wallSlice, screenColumn, columnAngle);
+            // const floorPixels = this.floorCaster.castFloorColumn(wallSlice, screenColumn, columnAngle);
 
             // render the wall slice
             // const color = this.getRGBColor(ray);
             // this.renderer.drawWallSlice(wallSlice, screenColumn, color);
             this.renderer.drawTexturedWallSlice(ray, wallSlice, screenColumn);
-            this.renderer.drawTexturedFloorSlice(floorPixels, wallSlice, screenColumn);
+            // this.renderer.drawTexturedFloorSlice(floorPixels, wallSlice, screenColumn);
 
             columnAngle += 1;
         }
 
-        this.renderer.blitBufferCanvas();
+        // this.renderer.blitBufferCanvas();
 
     }
 

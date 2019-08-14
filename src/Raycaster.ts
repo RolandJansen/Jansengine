@@ -123,7 +123,7 @@ export default class Raycaster {
 
             // check if we have a collision and eventually return ray length
             const tile = this.getHorizontalCollisionTile(intersection, rayYDirection);
-            if (tile.tileType < 200) {
+            if (tile.tileType > 0) {
                 return Object.assign(tile, { collision: intersection });
             }
 
@@ -167,7 +167,7 @@ export default class Raycaster {
 
             // check if we have a collision and eventually return ray length
             const tile = this.getVerticalCollisionTile(intersection, rayXDirection);
-            if ( tile.tileType < 200) {
+            if (tile.tileType > 0) {
                 return Object.assign(tile, { collision: intersection });
             }
 

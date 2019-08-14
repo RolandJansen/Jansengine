@@ -84,7 +84,7 @@ export default class Player {
     private isObstacle(x: number, y: number): boolean {
         const mapField = this.mapData[Math.trunc(y)][Math.trunc(x)];
 
-        if (mapField < 200) {
+        if (mapField > 0) {
             return true;
         }
         return false;
