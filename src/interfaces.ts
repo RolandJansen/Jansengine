@@ -65,7 +65,8 @@ export interface IPixel {
     a: number;
 }
 
-export interface IWallSlice {
+export interface IWallSliceData {
     start: number;
     end: number;
+    height: number;
 }

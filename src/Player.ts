@@ -8,7 +8,7 @@ export default class Player {
         x: 16,
         y: 10,
     };
-    public playerHeight = 0.2;  // 1=screenheight (if 1~320px -> 0.2~64px)
+    public playerHeight = 0.3;  // 1=screenheight (if 1~400px -> 0.2~120px)
     public direction = 0;  // north=90°, south=270°, etc
     public movementSpeed = 0.18;
     public rotateLeftRight = 0;  // left = 1, right = -1 (degree)
@@ -84,7 +84,7 @@ export default class Player {
     private isObstacle(x: number, y: number): boolean {
         const mapField = this.mapData[Math.trunc(y)][Math.trunc(x)];
 
-        if (mapField !== 0) {
+        if (mapField < 200) {
             return true;
         }
         return false;

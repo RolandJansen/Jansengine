@@ -2,7 +2,7 @@ import { IPixel } from "./interfaces";
 
 export default class Texture {
 
-    public textureName = "";
+    public name = "";
     public image: HTMLImageElement;
     public imageDark: HTMLImageElement;
     public width = 0;
@@ -13,14 +13,12 @@ export default class Texture {
     private pixels!: Uint8ClampedArray;
     private dimmedPixels!: Uint8ClampedArray;
 
-    constructor(imageName?: string) {
+    constructor(imageName: string) {
         this.image = new Image();
         this.imageDark = new Image();
 
-        if (imageName) {
-            this.textureName = imageName;
-            this.loadTexture(imageName);
-        }
+        this.name = imageName;
+        this.loadTexture(imageName);
     }
 
     public get singleXOffset() {
@@ -51,7 +49,7 @@ export default class Texture {
     }
 
     public loadTexture(imageName: string) {
-        this.textureName = imageName;
+        this.name = imageName;
         this.image.crossOrigin = "Anonymous"; // use cache if possible
         this.image.onload = () => {
             this.onTextureLoaded();

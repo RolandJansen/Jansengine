@@ -123,7 +123,7 @@ export default class Raycaster {
 
             // check if we have a collision and eventually return ray length
             const tile = this.getHorizontalCollisionTile(intersection, rayYDirection);
-            if (tile.tileType !== 0) {
+            if (tile.tileType < 200) {
                 return Object.assign(tile, { collision: intersection });
             }
 
@@ -167,7 +167,7 @@ export default class Raycaster {
 
             // check if we have a collision and eventually return ray length
             const tile = this.getVerticalCollisionTile(intersection, rayXDirection);
-            if ( tile.tileType !== 0) {
+            if ( tile.tileType < 200) {
                 return Object.assign(tile, { collision: intersection });
             }
 
@@ -219,22 +219,22 @@ export default class Raycaster {
         return { tile, tileType };
     }
 
-    private getHorizontalFloorTile(collisionTile: ICoords, rayYDir: number): ICoords {
-        let tile: ICoords;
+    // private getHorizontalFloorTile(collisionTile: ICoords, rayYDir: number): ICoords {
+    //     let tile: ICoords;
 
-        if (rayYDir === 1) {
-            tile = {
-                x: collisionTile.x,
-                y: collisionTile.y - 1,
-            };
-        } else {
-            tile = {
-                x: collisionTile.x,
-                y: collisionTile.y + 1,
-            };
-        }
-        return tile;
-    }
+    //     if (rayYDir === 1) {
+    //         tile = {
+    //             x: collisionTile.x,
+    //             y: collisionTile.y - 1,
+    //         };
+    //     } else {
+    //         tile = {
+    //             x: collisionTile.x,
+    //             y: collisionTile.y + 1,
+    //         };
+    //     }
+    //     return tile;
+    // }
 
     private getVerticalCollisionTile(intersection: ICoords, rayXDir: number): ITile {
         let tile: ICoords;

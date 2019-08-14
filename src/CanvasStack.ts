@@ -39,6 +39,14 @@ export default class CanvasStack {
         this.container.style.backgroundColor = color;
     }
 
+    public getBufferContext(): CanvasRenderingContext2D {
+        return this.canvasStack.buffer.getContext("2d")!;
+    }
+
+    public getBackgroundContext(): CanvasRenderingContext2D {
+        return this.canvasStack.background.getContext("2d")!;
+    }
+
     public getGameContext(): CanvasRenderingContext2D {
         return this.canvasStack.game.getContext("2d")!;
     }
@@ -73,16 +81,27 @@ export default class CanvasStack {
     }
 
     private getNewCanvasStack(): ICanvasStack {
+        const buffer = document.createElement("canvas");
+        const background = document.createElement("canvas");
         const game = document.createElement("canvas");
         const miniMap = document.createElement("canvas");
         const miniPlayer = document.createElement("canvas");
 
-        if (this.isCanvas(game) && this.isCanvas(miniMap) && this.isCanvas(miniPlayer)) {
+        if (this.isCanvas(buffer) &&
+            this.isCanvas(background) &&
+            this.isCanvas(game) &&
+            this.isCanvas(miniMap) &&
+            this.isCanvas(miniPlayer)) {
+
+            buffer.id = "offscreen";
+            background.id = "background";
             game.id = "game";
             miniMap.id = "miniMap";
             miniPlayer.id = "miniPlayer";
 
             return {
+                buffer,
+                background,
                 game,
                 miniMap,
                 miniPlayer,
@@ -113,15 +132,17 @@ export default class CanvasStack {
     }
 
     private setCanvasStackZIndex() {
-        this.canvasStack.game.style.zIndex = "100";
-        this.canvasStack.miniMap.style.zIndex = "110";
-        this.canvasStack.miniPlayer.style.zIndex = "120";
+        this.canvasStack.background.style.zIndex = "200";
+        this.canvasStack.game.style.zIndex = "300";
+        this.canvasStack.miniMap.style.zIndex = "400";
+        this.canvasStack.miniPlayer.style.zIndex = "500";
     }
 
     private addCanvasElementsToDom(canvasContainer: HTMLElement) {
         canvasContainer.style.position = "relative"; // has to be relative to enable absolute positioning inside
         for (const key in this.canvasStack) {
-            if (this.canvasStack.hasOwnProperty(key)) {
+            if (this.canvasStack.hasOwnProperty(key) &&
+                key !== "buffer") {  // we don't want the buffer in the dom
                 const canvas = this.canvasStack[key];
                 canvasContainer.appendChild(canvas);
             }

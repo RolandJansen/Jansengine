@@ -27,7 +27,6 @@ export default class KeyBindings {
             this.player.rotateLeftRight = 1;
             break;
         }
-        // console.log("Keydown: " + e.key + ", " + e.keyCode);
     }
 
     private processKeyUp(e: KeyboardEvent) {
@@ -42,6 +41,5 @@ export default class KeyBindings {
             this.player.rotateLeftRight = 0;
             break;
         }
-        // console.log("Keyup: " + e.key + ", " + e.code);
     }
 }

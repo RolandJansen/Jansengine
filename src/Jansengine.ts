@@ -4,8 +4,6 @@ import { IEngineOptions, IMapData } from "./interfaces";
 import KeyBindings from "./KeyBindings";
 import MiniMap from "./MiniMap";
 import Player from "./Player";
-// import Raycaster from "./Raycaster";
-import Renderer from "./Renderer";
 import { getSettings } from "./settings";
 import Texture from "./Texture";
 
@@ -45,12 +43,31 @@ export default class Jansengine {
         // this.renderer = new Renderer(this.screen.getGameContext(), this.screen.getProjectionPlane());
     }
 
-    public gameCycle() {
-        this.player.move();
-        // const rays = this.rayCaster.castRays(this.player.playerPosition, this.player.direction);
-        this.controller.castAndRender(this.player.playerPosition, this.player.direction);
+    public loadMap(mapData: IMapData) {
+        this.map = new MiniMap(mapData, this.screen);
+        this.player = new Player(mapData);
+        this.keyBindings = new KeyBindings(this.player);
+        // this.rayCaster = new Raycaster(mapData, this.screen.getProjectionPlane());
+        this.controller = new Controller(this.screen, mapData, this.player);
+    }
 
-        // console.log(rays);
+    public addTextures() {
+
+    }
+
+    private addTexture(imageName: string, tileType?: number): this {
+        this.controller.addTexture(imageName, tileType);
+        return this;
+    }
+
+    public startGame() {
+        // if something then gameCycle()
+    }
+
+    private gameCycle() {
+        this.player.move();
+        this.controller.castAndRender();
+
         // this.map.updateMiniPlayer(this.player.playerPosition, this.player.direction);
         // this.map.updateRays(this.player.playerPosition, rays);
         // this.map.updatePlayerDirection(this.player.playerPosition, this.player.direction);
@@ -59,18 +76,4 @@ export default class Jansengine {
             this.gameCycle();
         }, 1000 / 30);
     }
-
-    public loadMap(mapData: IMapData) {
-        this.map = new MiniMap(mapData, this.screen);
-        this.player = new Player(mapData);
-        this.keyBindings = new KeyBindings(this.player);
-        // this.rayCaster = new Raycaster(mapData, this.screen.getProjectionPlane());
-        this.controller = new Controller(this.screen, mapData);
-    }
-
-    public addTexture(imageName: string, tileType?: number): this {
-        this.controller.addTexture(imageName, tileType);
-        return this;
-    }
-
 }
