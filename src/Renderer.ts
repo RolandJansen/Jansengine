@@ -14,7 +14,7 @@ export default class Renderer {
 
     constructor(private readonly textures: Texture[], canvases: CanvasStack) {
         this.settings = getSettings();
-        this.plane = canvases.getProjectionPlane();
+        this.plane = canvases.planePropertiesInPixels;
         this.bgCtx = canvases.getBackgroundContext();
         this.gameCtx = canvases.getGameContext();
         this.bufferCtx = canvases.getBufferContext();
@@ -131,6 +131,7 @@ export default class Renderer {
 
             if (ray.collisionType === "h") {
                 tileOffset = ray.collision.x - ray.tile.x;
+                // console.log("offset: " + tileOffset + " singleXOffset: " + texture.singleXOffset);
                 image = texture.image;
             } else {
                 tileOffset = ray.collision.y - ray.tile.y;

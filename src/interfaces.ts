@@ -24,6 +24,7 @@ export interface ICollision extends ITile {
 export interface IRayData extends ICollision {
     rayLength: number;      // scalar distance between player and wall
     collisionType: string;  // "v" for vertical-, "h" for horizontal-collision
+    rayDirection: number;   // ray facing left/right or up/down (depending on col. type)
 }
 
 // export interface IWallProjection {

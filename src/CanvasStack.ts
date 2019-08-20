@@ -3,6 +3,8 @@ import { getSettings } from "./settings";
 
 export default class CanvasStack {
 
+    public readonly planePropertiesInPixels: IProjectionPlane;
+    public readonly planePropiertiesAbstract: IProjectionPlane;
     private container: HTMLElement;
     private canvasStack: ICanvasStack;
     private settings: IEngineOptions;
@@ -32,6 +34,9 @@ export default class CanvasStack {
         } else {
             throw new Error(`${containerName} is not a <div> element.`);
         }
+
+        this.planePropertiesInPixels = this.getProjectionPlaneInPixels();
+        this.planePropiertiesAbstract = this.getProjectionPlaneAbstract();
     }
 
     public setBackgroundColor(color: string) {
@@ -59,18 +64,37 @@ export default class CanvasStack {
         return this.canvasStack.miniPlayer.getContext("2d")!;
     }
 
-    public getProjectionPlane(): IProjectionPlane {
+    public setFocusOnGame() {
+        this.setFocusToCanvas(this.canvasStack.game);
+    }
+
+    private getProjectionPlaneInPixels(): IProjectionPlane {
+        const halfFoV = this.settings.fov / 2;
+
         return {
             width: this.settings.canvasSize.width,
             height: this.settings.canvasSize.height,
             horizontalCenter: Math.floor(this.settings.canvasSize.width * 0.5),
             verticalCenter: Math.floor(this.settings.canvasSize.height * 0.5),
-            distanceToPlayer: 1.5, // why 1.5? (found this by surprise)
+            distanceToPlayer: (this.settings.canvasSize.width / 2) / Math.tan(halfFoV),
         };
     }
 
-    public setFocusOnGame() {
-        this.setFocusToCanvas(this.canvasStack.game);
+    private getProjectionPlaneAbstract(): IProjectionPlane {
+        const distanceToPlayer = 1.5;
+        const halfFoV = this.settings.fov / 2;
+        const width = distanceToPlayer * Math.tan(halfFoV) * 2;
+        const height = (width * this.settings.canvasSize.height) / this.settings.canvasSize.width;
+        const horizontalCenter = width / 2;
+        const verticalCenter = height / 2;
+
+        return {
+            width,
+            height,
+            horizontalCenter,
+            verticalCenter,
+            distanceToPlayer,
+        };
     }
 
     private setContainerProperties() {
@@ -142,7 +166,7 @@ export default class CanvasStack {
         canvasContainer.style.position = "relative"; // has to be relative to enable absolute positioning inside
         for (const key in this.canvasStack) {
             if (this.canvasStack.hasOwnProperty(key) &&
-                key !== "buffer") {  // we don't want the buffer in the dom
+                key !== "buffer") {  // we don't want the buffer canvas in the dom
                 const canvas = this.canvasStack[key];
                 canvasContainer.appendChild(canvas);
             }

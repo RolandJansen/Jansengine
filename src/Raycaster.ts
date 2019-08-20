@@ -82,6 +82,7 @@ export default class Raycaster {
         const hRayData: IRayData = Object.assign(hCollision, {
             rayLength: hRayLength,
             collisionType: "h",
+            rayDirection: rayYDirection,
         });
 
         ////////////////////////////
@@ -92,6 +93,7 @@ export default class Raycaster {
         const vRayData: IRayData = Object.assign(vCollision, {
             rayLength: vRayLength,
             collisionType: "v",
+            rayDirection: rayXDirection,
         });
 
         return this.getClosestCollision(hRayData, vRayData);
