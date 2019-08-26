@@ -21,10 +21,10 @@ export default class KeyBindings {
             this.player.walkForBack = -1;
             break;
             case "KeyA":
-            this.player.rotateLeftRight = -1;
+            this.player.rotateLeftRight = 1;
             break;
             case "KeyD":
-            this.player.rotateLeftRight = 1;
+            this.player.rotateLeftRight = -1;
             break;
         }
     }

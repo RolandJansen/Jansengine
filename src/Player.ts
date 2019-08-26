@@ -8,12 +8,12 @@ export default class Player {
         x: 16,
         y: 10,
     };
-    public playerHeight = 0.3;  // 1=screenheight (if 1~400px -> 0.2~120px)
+    public playerHeight = 0.5;  // 1=screenheight (if 1~400px -> 0.2~120px)
     public direction = 0;  // north=90°, south=270°, etc
     public movementSpeed = 0.18;
-    public rotateLeftRight = 0;  // left = 1, right = -1 (degree)
+    public rotateLeftRight = 0;  // left = 1, right = -1 (pseudo-angle)
     public walkForBack = 0; // backward = -1, forward = 1
-    public rotationSpeed = 34;  // degrees per game cycle
+    public rotationSpeed = 34;  // pseudo-angle per game cycle
 
     private readonly mapWidth: number;
     private readonly mapHeight: number;

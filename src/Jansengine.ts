@@ -1,6 +1,6 @@
 import CanvasStack from "./CanvasStack";
 import Controller from "./Controller";
-import { IEngineOptions, IMapData } from "./interfaces";
+import { IEngineOptions, MapData } from "./interfaces";
 import KeyBindings from "./KeyBindings";
 import MiniMap from "./MiniMap";
 import Player from "./Player";
@@ -43,16 +43,12 @@ export default class Jansengine {
         // this.renderer = new Renderer(this.screen.getGameContext(), this.screen.getProjectionPlane());
     }
 
-    public loadMap(mapData: IMapData) {
+    public loadMap(mapData: MapData) {
         this.map = new MiniMap(mapData, this.screen);
         this.player = new Player(mapData);
         this.keyBindings = new KeyBindings(this.player);
         // this.rayCaster = new Raycaster(mapData, this.screen.getProjectionPlane());
         this.controller = new Controller(this.screen, mapData, this.player);
-    }
-
-    public addTextures() {
-
     }
 
     private addTexture(imageName: string, tileType?: number): this {

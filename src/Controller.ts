@@ -1,14 +1,16 @@
 import CanvasStack from "./CanvasStack";
-import FloorCaster from "./FloorCaster";
+import FloorProjector from "./FloorProjector";
 import {
     ICoords,
     IEngineOptions,
     ILookupTables,
-    IMapData,
+    MapData,
     IProjectionPlane,
     IRadiants,
     IRayData,
-    IWallSliceData } from "./interfaces";
+    IWallSliceData,
+    ITileProjection,
+    ITile} from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import Player from "./Player";
 import Raycaster from "./Raycaster";
@@ -23,23 +25,21 @@ export default class Controller {
 
     private textures: Texture[];
     private rayCaster: Raycaster;
-    private floorCaster: FloorCaster;
+    private floorProjector: FloorProjector;
     private renderer: Renderer;
 
     constructor(private readonly screen: CanvasStack,
-                private readonly mapData: IMapData,
+                private readonly mapData: MapData,
                 private readonly player: Player) {
         this.settings = getSettings();
         this.a = getAngles();
         this.tables = getLookupTables();
 
         this.textures = [];
-        this.rayCaster = new Raycaster(this.mapData, this.screen.planePropertiesInPixels);
-        this.floorCaster = new FloorCaster(
-            this.screen.planePropiertiesAbstract,
-            this.player,
-            this.mapData,
-            this.textures);
+        this.rayCaster = new Raycaster(this.mapData);
+        this.floorProjector = new FloorProjector(
+            this.screen,
+            this.player);
         this.renderer = new Renderer(this.textures, this.screen);
     }
 
@@ -54,46 +54,50 @@ export default class Controller {
     }
 
     public castAndRender() {
-        let columnAngle = this.player.direction - this.a.angle30;
-        let floorTile: ICoords = { x: -1, y: -1 };
+        // cast ...
+        const rays: IRayData[] = this.rayCaster.castRays(
+            this.player.playerPosition,
+            this.player.direction);
+        const floorTiles: ITile[] = this.rayCaster.visibleFloorTiles;
 
+        // ... compute projections ...
+        const wallSlices: IWallSliceData[] = this.getWallSlices(rays);
+        const floorProjections: ITileProjection[] = this.getFloorProjections(floorTiles);
 
+        // ... and render
         this.renderer.clearBufferCanvas();
         this.renderer.clearGameCanvas();
         this.renderer.drawBackground();
 
-        for (let screenColumn = 0; screenColumn < this.settings.canvasSize.width; screenColumn++) {
+        rays.forEach((ray, screenColumn) => {
+            const wallSlice = wallSlices[screenColumn];
+            this.renderer.drawTexturedWallSlice(ray, wallSlice, screenColumn);
+        });
+
+        this.renderer.drawFloorTiles(floorProjections);
+
+        // for (let screenColumn = 0; screenColumn < this.settings.canvasSize.width; screenColumn++) {
             // find wall collision and get ray data
-            const ray: IRayData = this.rayCaster.castRay(columnAngle, this.player.playerPosition);
 
-            // normalize fishbowl effect
-            ray.rayLength = this.tables.fishbowl[screenColumn] * ray.rayLength;
-
-            const wallSlice = this.getWallSlice(ray);
+            // const wallSlice = this.getWallSlice(ray);
 
             // render the wall slice
-            // const color = this.getRGBColor(ray);
-            // this.renderer.drawWallSlice(wallSlice, screenColumn, color);
-            this.renderer.drawTexturedWallSlice(ray, wallSlice, screenColumn);
-            // this.renderer.drawTexturedFloorSlice(floorPixels, wallSlice, screenColumn);
+            // this.renderer.drawTexturedWallSlice(ray, wallSlice, screenColumn);
+            // this.renderer.drawFloorTiles(floorProjections);
 
-            if (ray.collisionType === "v" &&
-                ray.rayDirection === 1) {
-                    floorTile = {
-                        x: ray.tile.x - 1,
-                        y: ray.tile.y,
-                    };
-            }
+            // columnAngle -= 1;
+        // }
 
-            if (floorTile.x !== -1) {
-                const fTileEdges = this.getTileEdges(floorTile);
-            }
+    }
 
-            columnAngle += 1;
-        }
+    private getWallSlices(rays: IRayData[]): IWallSliceData[] {
+        const slices: IWallSliceData[] = [];
 
-        // this.renderer.blitBufferCanvas();
-
+        rays.forEach((ray) => {
+            const slice = this.getWallSlice(ray);
+            slices.push(slice);
+        });
+        return slices;
     }
 
     private getWallSlice(ray: IRayData): IWallSliceData {
@@ -112,13 +116,15 @@ export default class Controller {
         };
     }
 
-    private getTileEdges(tile: ICoords): ICoords[] {
-        return [
-            tile,
-            { x: tile.x,     y: tile.y + 1 },
-            { x: tile.x + 1, y: tile.y + 1 },
-            { x: tile.x + 1, y: tile.y },
-        ];
+    private getFloorProjections(tiles: ITile[]): ITileProjection[] {
+        const projections: ITileProjection[] = [];
+
+        tiles.forEach((tile) => {
+            const projection = this.floorProjector.getTileProjection(tile);
+            projections.push(projection);
+        });
+
+        return projections;
     }
 
     private getRGBColor(ray: IRayData): string {

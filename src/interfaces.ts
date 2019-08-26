@@ -1,10 +1,12 @@
-export type IMapData = number[][];
+export type MapData = number[][];
+export type FlaggedMap = boolean[][];
+export type FloorTileEdges = ICoords[];
 
 export interface IEngineOptions {
     pov: number;
     fov: number;
     canvasSize: ICanvasSize;
-    map?: IMapData;
+    map?: MapData;
 }
 
 export interface ICoords {
@@ -13,26 +15,25 @@ export interface ICoords {
 }
 
 export interface ITile {
-    tile: ICoords;          // base coord (vector) of a tile
+    coords: ICoords;          // base coord (vector) of a tile
     tileType: number;       // type of tile (wall, floor, etc)
 }
 
-export interface ICollision extends ITile {
+export interface ITileProjection {
+    edgeCoords: ICoords[];  // 4 pixel-coords representing each corner
+    tileType: number;
+}
+
+export interface ICollision {
     collision: ICoords;     // vector of the collision point
+    collisionType: string;  // "v" for vertical-, "h" for horizontal-collision
+    wallTile: ITile;        // the wall that was hit
 }
 
 export interface IRayData extends ICollision {
     rayLength: number;      // scalar distance between player and wall
-    collisionType: string;  // "v" for vertical-, "h" for horizontal-collision
     rayDirection: number;   // ray facing left/right or up/down (depending on col. type)
 }
-
-// export interface IWallProjection {
-//     height: number;
-//     halfHeight: number;
-//     startPixel: number;
-//     endPixel: number;
-// }
 
 export interface ICanvasStack {
     [canvasName: string]: HTMLCanvasElement;
@@ -59,12 +60,12 @@ export interface IRadiants {
     [radian: string]: number;
 }
 
-export interface IPixel {
-    r: number;
-    g: number;
-    b: number;
-    a: number;
-}
+// export interface IPixel {
+//     r: number;
+//     g: number;
+//     b: number;
+//     a: number;
+// }
 
 export interface IWallSliceData {
     start: number;

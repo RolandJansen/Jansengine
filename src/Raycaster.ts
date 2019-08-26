@@ -1,60 +1,67 @@
+import FloorProjector from "./FloorProjector";
 import {
+    FlaggedMap,
     ICollision,
     ICoords,
     IEngineOptions,
     ILookupTables,
-    IMapData,
-    IProjectionPlane,
     IRadiants,
     IRayData,
-    ITile} from "./interfaces";
+    ITile,
+    MapData} from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import { getAngles, getSettings } from "./settings";
 
 export default class Raycaster {
+    public visibleFloorTiles: ITile[];
+
     private readonly mapWidth: number;
     private readonly mapHeight: number;
     private readonly settings: IEngineOptions;
     private readonly a: IRadiants;
     private readonly tables: ILookupTables;
+
+    private flaggedMap: FlaggedMap;
     private playerPosition: ICoords = {
         x: 0,
         y: 0,
     } ;
 
-    constructor(
-        private readonly mapData: IMapData,
-        private plane: IProjectionPlane) {
+    private counter = 0;
+
+    constructor(private readonly mapData: MapData) {
 
             this.settings = getSettings();
             this.a = getAngles();
             this.tables = getLookupTables();
             this.mapWidth = this.mapData[0].length;
             this.mapHeight = this.mapData.length;
-            // this.rayData = { rayLengths: [], collisions: [] };
+            this.flaggedMap = [];
+            this.visibleFloorTiles = [];
     }
 
-    // public castRays(playerPosition: ICoords, direction: number): IRayData[] {
-
-    //     const rays: IRayData[] = [];
-    //     let rayAngle = direction - this.a.angle30;
-
-    //     this.playerPosition = playerPosition;
-
-    //     for (let i = 0; i < this.settings.canvasSize.width; i++) {
-    //         const ray = this.castRayAt(rayAngle);
-
-    //         ray.rayLength = this.tables.fishbowl[i] * ray.rayLength;
-
-    //         rays[i] = ray;
-    //         rayAngle += 1;
-    //     }
-
-    //     return rays;
-    // }
-
-    public castRay(rayAngle: number, playerPosition: ICoords): IRayData {
+    public castRays(playerPosition: ICoords, direction: number): IRayData[] {
         this.playerPosition = playerPosition;
+        this.flaggedMap = this.getUnflaggedMap();
+        this.visibleFloorTiles = [];
+        this.counter = 0;
+
+        const rays: IRayData[] = [];
+        let rayAngle = direction + this.a.angle30;
+
+        for (let i = 0; i < this.settings.canvasSize.width; i++) {
+            const ray = this.castRay(rayAngle);
+
+            ray.rayLength = this.tables.fishbowl[i] * ray.rayLength;
+
+            rays[i] = ray;
+            rayAngle -= 1;
+        }
+
+        return rays;
+    }
+
+    public castRay(rayAngle: number): IRayData {
 
         // make shure we're between 0° and 359°
         if (rayAngle < 0) {
@@ -125,8 +132,16 @@ export default class Raycaster {
 
             // check if we have a collision and eventually return ray length
             const tile = this.getHorizontalCollisionTile(intersection, rayYDirection);
+
             if (tile.tileType > 0) {
-                return Object.assign(tile, { collision: intersection });
+                return {
+                    collision: intersection,
+                    collisionType: "h",
+                    wallTile: tile,
+                };
+            } else {  // we have a visible floor tile
+                const test = this.flaggedMap;
+                this.setVisibleFloorTile(tile);
             }
 
             // next point can be found by simply adding delta
@@ -136,11 +151,17 @@ export default class Raycaster {
             };
         }
 
+        // no collision, no tile
+        const noTile = {
+            coords: { x: -1, y: -1 },
+            tileType: -1,
+        };
+
         // if no horizontal collision was found, ray travels forever (in y)
         return {
-            tile: { x: -1, y: -1 },
-            tileType: -1,
             collision: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
+            collisionType: "h",
+            wallTile: noTile,
         };
     }
 
@@ -170,7 +191,13 @@ export default class Raycaster {
             // check if we have a collision and eventually return ray length
             const tile = this.getVerticalCollisionTile(intersection, rayXDirection);
             if (tile.tileType > 0) {
-                return Object.assign(tile, { collision: intersection });
+                return {
+                    collision: intersection,
+                    collisionType: "v",
+                    wallTile: tile,
+                };
+            } else {  // we have a visible floor tile
+                this.setVisibleFloorTile(tile);
             }
 
             // next point can be found by simply adding delta
@@ -178,11 +205,17 @@ export default class Raycaster {
             intersection.y += this.tables.ydelta[rayAngle];
         }
 
+        // no collision, no tile
+        const noTile = {
+            coords: { x: -1, y: -1 },
+            tileType: -1,
+        };
+
         // if no vertical collision was found, ray travels forever (in x)
         return {
-            tile: { x: -1, y: -1 },
-            tileType: -1,
             collision: { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
+            collisionType: "v",
+            wallTile: noTile,
         };
     }
 
@@ -218,25 +251,27 @@ export default class Raycaster {
         }
 
         const tileType = this.mapData[tile.y][tile.x];
-        return { tile, tileType };
+        return { coords: tile, tileType };
     }
 
-    // private getHorizontalFloorTile(collisionTile: ICoords, rayYDir: number): ICoords {
-    //     let tile: ICoords;
+    private getHorizontalFloorTile(wallTileCoords: ICoords, rayYDir: number): ITile {
+        let tile: ICoords;
 
-    //     if (rayYDir === 1) {
-    //         tile = {
-    //             x: collisionTile.x,
-    //             y: collisionTile.y - 1,
-    //         };
-    //     } else {
-    //         tile = {
-    //             x: collisionTile.x,
-    //             y: collisionTile.y + 1,
-    //         };
-    //     }
-    //     return tile;
-    // }
+        if (rayYDir === 1) {
+            tile = {
+                x: wallTileCoords.x,
+                y: wallTileCoords.y - 1,
+            };
+        } else {
+            tile = {
+                x: wallTileCoords.x,
+                y: wallTileCoords.y + 1,
+            };
+        }
+
+        const tileType = this.mapData[tile.y][tile.x];
+        return { coords: tile, tileType };
+    }
 
     private getVerticalCollisionTile(intersection: ICoords, rayXDir: number): ITile {
         let tile: ICoords;
@@ -254,7 +289,26 @@ export default class Raycaster {
         }
 
         const tileType = this.mapData[tile.y][tile.x];
-        return { tile, tileType };
+        return { coords: tile, tileType };
+    }
+
+    private getVerticalFloorTile(wallTileCoords: ICoords, rayXDir: number): ITile {
+        let tile: ICoords;
+
+        if (rayXDir === 1) {
+            tile = {
+                x: wallTileCoords.x - 1,
+                y: wallTileCoords.y,
+            };
+        } else {
+            tile = {
+                x: wallTileCoords.x + 1,
+                y: wallTileCoords.y,
+            };
+        }
+
+        const tileType = this.mapData[tile.y][tile.x];
+        return { coords: tile, tileType };
     }
 
     private getRayLength(collision: ICoords, rayAngle: number): number {
@@ -274,18 +328,22 @@ export default class Raycaster {
         return rayLength;
     }
 
-    // private getWallProjectionData(rayData: IRayData): IWallProjection {
-    //     const height = (this.plane.distanceToPlayer / rayData.rayLength) * this.plane.height;
-    //     const halfHeight = Math.floor(height * 0.5);
-    //     const startPixel = this.plane.verticalCenter - halfHeight;
-    //     const endPixel = this.plane.verticalCenter + halfHeight;
+    private setVisibleFloorTile(tile: ITile) {
+        if (!this.flaggedMap[tile.coords.y][tile.coords.x]) {
+            // console.log("y: " + tile.coords.y + "  x: " + tile.coords.x);
+            this.visibleFloorTiles.push(tile);
+            this.flaggedMap[tile.coords.y][tile.coords.x] = true;
+        }
+    }
 
-    //     return {
-    //         height,
-    //         halfHeight,
-    //         startPixel,
-    //         endPixel,
-    //     };
-    // }
+    private getUnflaggedMap(): FlaggedMap {
+        // array is one bigger than map because
+        // then we save 4 minus (-) ops per tile (and it works anyway)
+        const fMap: FlaggedMap = Array(this.mapData.length + 1);
 
+        for (let i = 0; i < fMap.length; i++) {
+            fMap[i] = [];
+        }
+        return fMap;
+    }
 }

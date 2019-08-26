@@ -1,5 +1,5 @@
 import CanvasStack from "./CanvasStack";
-import { IEngineOptions, IPixel, IProjectionPlane, IRayData, IWallSliceData } from "./interfaces";
+import { IEngineOptions, IProjectionPlane, IRayData, IWallSliceData, ITileProjection } from "./interfaces";
 import { getSettings } from "./settings";
 import Texture from "./Texture";
 
@@ -32,9 +32,9 @@ export default class Renderer {
         this.gameCtx.clearRect(0, 0, this.plane.width, this.plane.height);
     }
 
-    public blitBufferCanvas() {
-        this.gameCtx.putImageData(this.pixelBuffer, 0, 0);
-    }
+    // public blitBufferCanvas() {
+    //     this.gameCtx.putImageData(this.pixelBuffer, 0, 0);
+    // }
 
     public drawBackground() {
         let c = 255;
@@ -121,7 +121,7 @@ export default class Renderer {
      * @param column
      */
     public drawTexturedWallSlice(ray: IRayData, wall: IWallSliceData, column: number) {
-        const texture = this.getTexture(ray.tileType);
+        const texture = this.getTexture(ray.wallTile.tileType);
         let image: HTMLImageElement;
 
         // this works but promises would be more elegant
@@ -130,11 +130,10 @@ export default class Renderer {
             let tileOffset: number;
 
             if (ray.collisionType === "h") {
-                tileOffset = ray.collision.x - ray.tile.x;
-                // console.log("offset: " + tileOffset + " singleXOffset: " + texture.singleXOffset);
+                tileOffset = ray.collision.x - ray.wallTile.coords.x;
                 image = texture.image;
             } else {
-                tileOffset = ray.collision.y - ray.tile.y;
+                tileOffset = ray.collision.y - ray.wallTile.coords.y;
                 image = texture.imageDark;
             }
 
@@ -150,30 +149,73 @@ export default class Renderer {
         }
     }
 
+    public drawFloorTiles(projections: ITileProjection[]) {
+        if (projections.length > 0) {
+            this.gameCtx.save();
+
+            this.gameCtx.fillStyle = "white";
+            this.gameCtx.strokeStyle = "#FF0000";
+            projections.forEach((projection) => {
+                this.drawSingleFloorTile(projection);
+            });
+
+            this.gameCtx.restore();
+        }
+    }
+
+    public drawSingleFloorTile(projection: ITileProjection) {
+        this.gameCtx.beginPath();
+
+        // the start point is the last coord to get a closed line
+        this.gameCtx.moveTo(
+            projection.edgeCoords[0].x,
+            projection.edgeCoords[0].y);
+
+        // for (let i = 1; i < projection.edgeCoords.length; i++) {
+        //     const coords = projection.edgeCoords[i];
+        //     this.gameCtx.lineTo(coords.x, coords.y);
+        // }
+
+        this.gameCtx.lineTo(projection.edgeCoords[1].x, projection.edgeCoords[1].y);
+        this.gameCtx.lineTo(projection.edgeCoords[2].x, projection.edgeCoords[2].y);
+        this.gameCtx.lineTo(projection.edgeCoords[3].x, projection.edgeCoords[3].y);
+
+        this.gameCtx.closePath();
+        this.gameCtx.stroke();
+        // this.gameCtx.fill();
+
+        this.gameCtx.moveTo(10, 10);
+        this.gameCtx.lineTo(10, 30);
+        this.gameCtx.lineTo(30, 30);
+        this.gameCtx.lineTo(30, 10);
+        this.gameCtx.closePath();
+        this.gameCtx.stroke();
+    }
+
     private getTexture(tileType: number): Texture {
         return this.textures[tileType - 1];
     }
 
-    private drawVerticalTexturedShadedLine(ray: IRayData, horizontalPosition: number) {
-        const lineHeight = (this.plane.distanceToPlayer / ray.rayLength) * this.plane.height;
-        const halfHeight = lineHeight * 0.5;
-        const startingPoint = this.plane.verticalCenter - halfHeight;
-        const endPoint = this.plane.verticalCenter + halfHeight;
+    // private drawVerticalTexturedShadedLine(ray: IRayData, horizontalPosition: number) {
+    //     const lineHeight = (this.plane.distanceToPlayer / ray.rayLength) * this.plane.height;
+    //     const halfHeight = lineHeight * 0.5;
+    //     const startingPoint = this.plane.verticalCenter - halfHeight;
+    //     const endPoint = this.plane.verticalCenter + halfHeight;
 
-        const texture = this.textures[ray.tileType];
-        let tileOffset: number;
+    //     const texture = this.textures[ray.wallTile.tileType];
+    //     let tileOffset: number;
 
-        if (ray.collisionType === "h") {
-            tileOffset = ray.collision.x - ray.tile.x;
-        } else {
-            tileOffset = ray.collision.y - ray.tile.y;
+    //     if (ray.collisionType === "h") {
+    //         tileOffset = ray.collision.x - ray.wallTile.coords.x;
+    //     } else {
+    //         tileOffset = ray.collision.y - ray.wallTile.coords.y;
 
-        }
-        const row = Math.floor(tileOffset / texture.singleXOffset);
-        const line = 0;
-        const pixel: IPixel = texture.getPixel(row, line);
+    //     }
+    //     const row = Math.floor(tileOffset / texture.singleXOffset);
+    //     const line = 0;
+    //     const pixel: IPixel = texture.getPixel(row, line);
 
-    }
+    // }
 
     // copied from F. Permadi tutorial
     private addDistanceShadow(distance: number): number {

@@ -1,5 +1,3 @@
-import { IPixel } from "./interfaces";
-
 export default class Texture {
 
     public name = "";
@@ -35,18 +33,18 @@ export default class Texture {
         throw new Error ("Texture not initialized. Couldn't read yOffset.");
     }
 
-    public getPixel(row: number, line: number): IPixel {
-        const rowOffset = row * this.bytesPerPixel;
-        const lineOffset = line * this.width * this.bytesPerPixel;
-        const offset = rowOffset + lineOffset;
+    // public getPixel(row: number, line: number): IPixel {
+    //     const rowOffset = row * this.bytesPerPixel;
+    //     const lineOffset = line * this.width * this.bytesPerPixel;
+    //     const offset = rowOffset + lineOffset;
 
-        return {
-            r: this.pixels[offset],
-            g: this.pixels[offset + 1],
-            b: this.pixels[offset + 2],
-            a: this.pixels[offset + 3],
-        };
-    }
+    //     return {
+    //         r: this.pixels[offset],
+    //         g: this.pixels[offset + 1],
+    //         b: this.pixels[offset + 2],
+    //         a: this.pixels[offset + 3],
+    //     };
+    // }
 
     public loadTexture(imageName: string) {
         this.name = imageName;

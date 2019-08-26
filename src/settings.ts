@@ -50,7 +50,7 @@ export function getSettings(): IEngineOptions {
 }
 
 export function getAngles(): IRadiants {
-    if (!angles.hasOwnProperty("numberOfAngles")) {
+    if (!angles.hasOwnProperty("angle360")) {
         setAllAngles();
     }
     return angles;

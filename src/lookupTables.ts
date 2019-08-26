@@ -94,7 +94,7 @@ function getFishbowlCorrection(degree: number): number {
     return Math.cos(radian);
 }
 
-function arcToRad(arcAngle: number) {
+export function arcToRad(arcAngle: number) {
     return ((arcAngle * Math.PI) / a.angle180);
 }
 

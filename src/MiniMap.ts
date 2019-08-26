@@ -27,7 +27,7 @@ export default class MiniMap {
 
         this.setCanvasResolution();
         // this.resizeCanvas();
-        // this.drawMap();
+        this.drawMap();
     }
 
     public updateMiniPlayer(playerPosition: ICoords, playerDirection: number) {
