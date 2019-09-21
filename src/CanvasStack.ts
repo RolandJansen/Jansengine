@@ -69,21 +69,21 @@ export default class CanvasStack {
     }
 
     private getProjectionPlaneInPixels(): IProjectionPlane {
-        const halfFoV = this.settings.fov / 2;
+        const halfFoV = this.settings.fov * Math.PI / 360;
 
         return {
             width: this.settings.canvasSize.width,
             height: this.settings.canvasSize.height,
             horizontalCenter: Math.floor(this.settings.canvasSize.width * 0.5),
             verticalCenter: Math.floor(this.settings.canvasSize.height * 0.5),
-            distanceToPlayer: (this.settings.canvasSize.width / 2) / Math.tan(halfFoV),
+            distanceToPlayer: Math.floor((this.settings.canvasSize.width / 2) / Math.tan(halfFoV)),
         };
     }
 
     private getProjectionPlaneAbstract(): IProjectionPlane {
         const distanceToPlayer = 1.5;
-        const halfFoV = this.settings.fov / 2;
-        const width = distanceToPlayer * Math.tan(halfFoV * Math.PI / 180) * 2;
+        const halfFoV = this.settings.fov * Math.PI / 360;
+        const width = distanceToPlayer * Math.tan(halfFoV) * 2;
         const height = (width * this.settings.canvasSize.height) / this.settings.canvasSize.width;
         const horizontalCenter = width / 2;
         const verticalCenter = height / 2;

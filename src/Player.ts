@@ -1,4 +1,4 @@
-import { ICoords, ILookupTables, IRadiants } from "./interfaces";
+import { ICoords, ILookupTables, IRadiants, MapData } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import { getAngles } from "./settings";
 
@@ -20,7 +20,7 @@ export default class Player {
     private readonly tables: ILookupTables;
     private readonly a: IRadiants;
 
-    constructor(private mapData: number[][], initialPlayerPos?: ICoords) {
+    constructor(private mapData: MapData, initialPlayerPos?: ICoords) {
         if (initialPlayerPos) {
             this.playerPosition = initialPlayerPos;
         }

@@ -5,7 +5,6 @@ import KeyBindings from "./KeyBindings";
 import MiniMap from "./MiniMap";
 import Player from "./Player";
 import { getSettings } from "./settings";
-import Texture from "./Texture";
 
 /**
  * Main class of the engine.
@@ -23,8 +22,6 @@ export default class Jansengine {
     private map!: MiniMap;
     private player!: Player;
     private keyBindings!: KeyBindings;
-    // private rayCaster!: Raycaster;
-    // private renderer: Renderer;
     private controller!: Controller;
 
     constructor(containerName: string, engineOptions?: IEngineOptions) {
@@ -40,14 +37,11 @@ export default class Jansengine {
         } else {
             this.screen = new CanvasStack(containerName);
         }
-        // this.renderer = new Renderer(this.screen.getGameContext(), this.screen.getProjectionPlane());
     }
 
     public loadMap(mapData: MapData) {
-        this.map = new MiniMap(mapData, this.screen);
         this.player = new Player(mapData);
         this.keyBindings = new KeyBindings(this.player);
-        // this.rayCaster = new Raycaster(mapData, this.screen.getProjectionPlane());
         this.controller = new Controller(this.screen, mapData, this.player);
     }
 

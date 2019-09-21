@@ -4,14 +4,15 @@ import {
     ICoords,
     IEngineOptions,
     ILookupTables,
-    MapData,
     IProjectionPlane,
     IRadiants,
     IRayData,
-    IWallSliceData,
+    ITile,
     ITileProjection,
-    ITile} from "./interfaces";
+    IWallSliceData,
+    MapData} from "./interfaces";
 import { getLookupTables } from "./lookupTables";
+import MiniMap from "./MiniMap";
 import Player from "./Player";
 import Raycaster from "./Raycaster";
 import Renderer from "./Renderer";
@@ -27,6 +28,7 @@ export default class Controller {
     private rayCaster: Raycaster;
     private floorProjector: FloorProjector;
     private renderer: Renderer;
+    private miniMap: MiniMap;
 
     constructor(private readonly screen: CanvasStack,
                 private readonly mapData: MapData,
@@ -41,6 +43,7 @@ export default class Controller {
             this.screen,
             this.player);
         this.renderer = new Renderer(this.textures, this.screen);
+        this.miniMap = new MiniMap(this.mapData, this.screen);
     }
 
     public addTexture(imageName: string, tileType?: number): this {
@@ -65,6 +68,9 @@ export default class Controller {
         const floorProjections: ITileProjection[] = this.getFloorProjections(floorTiles);
 
         // ... and render
+        this.miniMap.updateMiniPlayer(this.player.playerPosition, this.player.direction);
+        // this.miniMap.updateRays(this.player.playerPosition, rays);
+        this.miniMap.updatePlayerDirection(this.player.playerPosition, this.player.direction);
         this.renderer.clearBufferCanvas();
         this.renderer.clearGameCanvas();
         this.renderer.drawBackground();

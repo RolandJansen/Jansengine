@@ -16,9 +16,10 @@ export default class FloorProjector {
 
     private readonly tables: ILookupTables;
     private readonly angles: IRadiants;
-    // private readonly playerPixelHeight: number;
-    private readonly pixelPlane: IProjectionPlane;
-    private readonly abstractPlane: IProjectionPlane;
+    // pixelPlane/abstractPlane have to be
+    // writable (mockable)
+    private pixelPlane: IProjectionPlane;
+    private abstractPlane: IProjectionPlane;
 
     constructor(private readonly screen: CanvasStack,
                 private readonly player: Player) {
@@ -30,14 +31,14 @@ export default class FloorProjector {
     }
 
     public getTileProjection(tile: ITile): ITileProjection {
-        const abstractCorners: ICoords[] = this.getMapTileEdges(tile.coords);
+        const abstractCorners: ICoords[] = this.getMapTileCorners(tile.coords);
         const projectedCorners: ICoords[] = [];
 
         abstractCorners.forEach((corner: ICoords) => {
             const normalized = this.getNormalizedVector(this.player.playerPosition, corner);
             const absoluteAngle = this.getAbsoluteAngle(normalized);
 
-            const relativeAngle = this.getRelativeAngle(absoluteAngle, normalized);
+            const relativeAngle = this.getRelativeAngle(absoluteAngle);
             const directDistance = this.getDirectDistanceToCorner(normalized, absoluteAngle);
 
             const pixelColumn = this.getPixelColumn(relativeAngle);
@@ -55,7 +56,7 @@ export default class FloorProjector {
         };
     }
 
-    private getMapTileEdges(tile: ICoords): ICoords[] {
+    private getMapTileCorners(tile: ICoords): ICoords[] {
         return [
             tile,
             { x: tile.x,     y: tile.y + 1 },
@@ -88,7 +89,6 @@ export default class FloorProjector {
             return 0;
         }
 
-        // console.log(tanValue);
         // check which quadrant in the unit circle we're in
         // to shorten the array walk
         if (normalizedVector.y <= 0) {
@@ -104,7 +104,7 @@ export default class FloorProjector {
         }
 
         // walk through pre-generated tangent values
-        // and see if we have a match (cheaper than real cotangent)
+        // and see if we have a match (cheaper than real co-tangent)
         while (tanValue >= this.tables.tan[arc]) {
             arc++;
         }
@@ -112,14 +112,15 @@ export default class FloorProjector {
         return arc;
     }
 
-    private getRelativeAngle(absoluteAngle: number, normalizedVector: ICoords): number {
-        // let arc = absoluteAngle - this.player.direction - this.angles.angle30;
+    private getRelativeAngle(absoluteAngle: number): number {
         let arc = absoluteAngle - this.player.direction;
 
-        // console.log("angle: " + arc + " dir: " + this.player.direction);
-        // if (arc < -(this.angles.angle30)) {
-        //     arc += this.angles.angle360;
-        // }
+        if (arc < -this.angles.angle180) {
+            arc += this.angles.angle360;
+        }
+        if (arc > this.angles.angle180) {
+            arc -= this.angles.angle360;
+        }
 
         return arc;
     }
@@ -131,13 +132,11 @@ export default class FloorProjector {
      */
     private getDirectDistanceToCorner(normalizedVector: ICoords, absoluteAngle: number): number {
         const distance = normalizedVector.x * this.tables.icos[absoluteAngle];
-        // console.log(distance);
         return distance;
     }
 
     private getPixelColumn(relativeAngle: number): number {
         const column = this.pixelPlane.horizontalCenter - relativeAngle;
-        // console.log(column);
         return column;
     }
 
@@ -150,6 +149,7 @@ export default class FloorProjector {
         const ratio = planePlayerDist / straightDistance;
         const abstractRow = (this.player.playerHeight * ratio) + verticalCenter;
         const pixelRow = Math.round(abstractRow * planeHeightPx);
+        console.log(straightDistance);
 
         return pixelRow;
     }
