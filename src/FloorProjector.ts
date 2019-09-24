@@ -149,7 +149,7 @@ export default class FloorProjector {
         const ratio = planePlayerDist / straightDistance;
         const abstractRow = (this.player.playerHeight * ratio) + verticalCenter;
         const pixelRow = Math.round(abstractRow * planeHeightPx);
-        console.log(straightDistance);
+        // console.log(straightDistance);
 
         return pixelRow;
     }
