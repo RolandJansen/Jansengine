@@ -6,7 +6,6 @@ import {
     IRadiants,
     ITile,
     ITileProjection,
-    MapData,
 } from "./interfaces";
 import { getLookupTables } from "./lookupTables";
 import Player from "./Player";

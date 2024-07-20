@@ -28,7 +28,7 @@ export default class CanvasStack {
                 this.setCanvasStackProperties();
                 this.addCanvasElementsToDom(this.container);
             } else {
-                throw new Error("Your browser doesn\'t support the <canvas> element.");
+                throw new Error("Your browser doesn't support the <canvas> element.");
             }
 
         } else {
@@ -137,7 +137,7 @@ export default class CanvasStack {
 
     private setCanvasStackProperties() {
         for (const key in this.canvasStack) {
-            if (this.canvasStack.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.canvasStack, key)) {
                 const canvas = this.canvasStack[key];
                 this.setCanvasProperties(canvas);
             }
@@ -165,7 +165,7 @@ export default class CanvasStack {
     private addCanvasElementsToDom(canvasContainer: HTMLElement) {
         canvasContainer.style.position = "relative"; // has to be relative to enable absolute positioning inside
         for (const key in this.canvasStack) {
-            if (this.canvasStack.hasOwnProperty(key) &&
+            if (Object.prototype.hasOwnProperty.call(this.canvasStack, key) &&
                 key !== "buffer") {  // we don't want the buffer canvas in the dom
                 const canvas = this.canvasStack[key];
                 canvasContainer.appendChild(canvas);

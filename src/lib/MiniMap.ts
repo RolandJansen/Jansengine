@@ -30,7 +30,7 @@ export default class MiniMap {
         this.drawMap();
     }
 
-    public updateMiniPlayer(playerPosition: ICoords, playerDirection: number) {
+    public updateMiniPlayer(playerPosition: ICoords) {
         this.clearPlayerCanvas();
         this.drawPlayer(playerPosition);
     }

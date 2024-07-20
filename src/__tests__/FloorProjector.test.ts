@@ -4,11 +4,14 @@
 // Normally this could be considered as bad style ("test API only")
 // but here we want to test the single parts of the calculation
 // without exposing them to the public.
-import CanvasStack from "../CanvasStack";
-import FloorProjector from "../FloorProjector";
-import { ICanvasSize, ICoords, IProjectionPlane, MapData } from "../interfaces";
-import Player from "../Player";
-import { getAngles } from "../settings";
+import {beforeEach, describe, expect, test} from '@jest/globals';
+import { jest } from '@jest/globals';
+
+import CanvasStack from "../lib/CanvasStack";
+import FloorProjector from "../lib/FloorProjector";
+import { ICanvasSize, ICoords, IProjectionPlane, MapData } from "../lib/interfaces";
+import Player from "../lib/Player";
+import { getAngles } from "../lib/settings";
 
 // constructor properties
 const canvasSize: ICanvasSize = { width: 640, height: 400 };
@@ -27,8 +30,8 @@ const map: MapData = [
 ];
 
 // replace classes with mocks
-jest.mock("../Player");
-jest.mock("../CanvasStack");
+jest.mock("../lib/Player");
+jest.mock("../lib/CanvasStack");
 
 // some mock data
 const halfFoV = deg2rad(30);
@@ -53,7 +56,7 @@ const planePropertiesAbstract: IProjectionPlane = {
 
 // handy stuff
 const a = getAngles();
-const radPerPixel = 2 * Math.PI / a.angle360;
+// const radPerPixel = 2 * Math.PI / a.angle360;
 function deg2rad(degree: number): number {
     return degree * Math.PI / 180;
 }

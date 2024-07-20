@@ -1,5 +1,4 @@
 import Jansengine from "./Jansengine";
-import Texture from "./Texture";
 // the main file
 
 // function createAPI() {
