@@ -1,5 +1,5 @@
-import texture1 from './tile07.png'
-import texture2 from './tile13.png'
+import texture1 from './tile07.jpg'
+import texture2 from './tile13.jpg'
 
 import '../lib/main'
 import { getInstance } from '../lib/main';
@@ -33,7 +33,7 @@ const levelMap = [
 ];
 
 function init() {
-    const game = getInstance('demo')
+    const game = getInstance('app')
     game.loadMap(levelMap)
     game.addTexture(texture1, 1)
         .addTexture(texture2, 2)
