@@ -1,16 +1,11 @@
-// tslint:disable: max-line-length
+import texture1 from './tile07.png'
+import texture2 from './tile13.png'
 
-// The reason for this require/export hack
-// is to tell webpack to use these assets
-// but avoid adding them statically to the build.
-// tslint:disable:no-var-requires
-export const texture1 = require("./images/tile07.jpg") as string;
-// export const texture1 = require("./images/background-brick-bricks-220182.jpg") as string;
-export const texture2 = require("./images/tile13.jpg") as string;
-// export const texture2 = require("./images/background-brown-carpentry-326311.jpg") as string;
+import '../lib/main'
+import { getInstance } from '../lib/main';
 
 // 32x24 blocks
-export const levelMap = [
+const levelMap = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -36,3 +31,13 @@ export const levelMap = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
+
+function init() {
+    const game = getInstance('demo')
+    game.loadMap(levelMap)
+    game.addTexture(texture1, 1)
+        .addTexture(texture2, 2)
+    game.gameCycle()
+}
+
+init()
