@@ -1,4 +1,3 @@
-import FloorProjector from "./FloorProjector";
 import {
     FlaggedMap,
     ICollision,
@@ -140,7 +139,7 @@ export default class Raycaster {
                     wallTile: tile,
                 };
             } else {  // we have a visible floor tile
-                const test = this.flaggedMap;
+                // const test = this.flaggedMap;
                 this.setVisibleFloorTile(tile);
             }
 

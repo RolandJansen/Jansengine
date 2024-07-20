@@ -1,31 +1,24 @@
 {
-    "compilerOptions": {
-        // https://www.typescriptlang.org/docs/handbook/compiler-options.html
-        // https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
-        "moduleResolution": "node",  //search for imports in node_modules
-        // "outDir": "./demo/jansengine",          //empty value because webpack takes care of it
-        // "outFile": "./dist/jansengine.js",
-        "sourceMap": true,
-        "noEmitOnError": true,
-        // "removeComments": true,
-        // "module": "None",
-        "target": "ES6",
-        "declaration": true,   //generate typings
-        "experimentalDecorators": true,  //should be experimental no more
-        // "declarationDir": "./dts/",
-        // "allowJs": true
-        // "checkJs": true,
-        "strict": true,
-        "lib": [ "dom", "es7" ],  // used to get es7 lang features like [].includes()
-    },
-    "files": [
-        "./src/index.ts"
-    ]
-    // "include": [
-    //     "src/**/*"
-    // ],
-    // "exclude": [
-    //     "node-modules",
-    //     "dist/**/*"
-    // ]
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
 }

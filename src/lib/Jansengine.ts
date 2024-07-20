@@ -45,7 +45,7 @@ export default class Jansengine {
         this.controller = new Controller(this.screen, mapData, this.player);
     }
 
-    private addTexture(imageName: string, tileType?: number): this {
+    public addTexture(imageName: string, tileType?: number): this {
         this.controller.addTexture(imageName, tileType);
         return this;
     }
@@ -54,7 +54,7 @@ export default class Jansengine {
         // if something then gameCycle()
     }
 
-    private gameCycle() {
+    public gameCycle() {
         this.player.move();
         this.controller.castAndRender();
 

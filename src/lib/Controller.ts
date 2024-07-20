@@ -1,10 +1,8 @@
 import CanvasStack from "./CanvasStack";
 import FloorProjector from "./FloorProjector";
 import {
-    ICoords,
     IEngineOptions,
     ILookupTables,
-    IProjectionPlane,
     IRadiants,
     IRayData,
     ITile,

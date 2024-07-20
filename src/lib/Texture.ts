@@ -66,13 +66,16 @@ export default class Texture {
         this.width = this.image.width;
         this.height = this.image.height;
 
-        this.pixels = this.getPixelsFromImage(this.image);
+        // this.pixels = this.getPixelsFromImage(this.image);
+        this.pixels = this.getPixelsFromImage();
 
         const dimmedPixels = this.getDimmedPixels(25);
         this.imageDark = this.getImageFromPixels(dimmedPixels);
     }
 
-    private getPixelsFromImage(img: HTMLImageElement): Uint8ClampedArray {
+    // refactor to img
+    // private getPixelsFromImage(img: HTMLImageElement): Uint8ClampedArray {
+    private getPixelsFromImage(): Uint8ClampedArray {
         const textureBuffer = document.createElement("canvas");
         const ctx = textureBuffer.getContext("2d");
 

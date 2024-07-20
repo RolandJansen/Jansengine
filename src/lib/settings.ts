@@ -1,4 +1,4 @@
-import { IEngineOptions, ILookupTables, IRadiants } from "./interfaces";
+import { IEngineOptions, IRadiants } from "./interfaces";
 
 // All options that are used throughout the engine
 const settings: IEngineOptions = {
@@ -36,21 +36,22 @@ function setAllAngles() {
     angles.angle270 = Math.floor(angles.angle90 * 3);
 }
 
-function isEmpty(obj: object): boolean {
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            return false;
-        }
-    }
-    return true;
-}
+// TODO: not used: why?
+// function isEmpty(obj: object): boolean {
+//     for (const key in obj) {
+//         if (obj.hasOwnProperty(key)) {
+//             return false;
+//         }
+//     }
+//     return true;
+// }
 
 export function getSettings(): IEngineOptions {
     return settings;
 }
 
 export function getAngles(): IRadiants {
-    if (!angles.hasOwnProperty("angle360")) {
+    if (!Object.prototype.hasOwnProperty.call(angles, "angle360")) {
         setAllAngles();
     }
     return angles;
